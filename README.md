@@ -77,3 +77,4 @@ git merge main
 - Don't commit secrets, `.env` files, or build output (see `.gitignore`).
 
 <!-- Test commit: verifying push access (2026-10-10) -->
+<!-- Test commit: verifying push access (2026-10-10, follow-up) -->
