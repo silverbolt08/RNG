@@ -69,7 +69,7 @@ git checkout yourname/your-branch
 git merge main
 ```
 
-## Rules of thumb
+##Rules of thumb
 
 - `git pull` before you start anything. Most conflicts come from stale `main`.
 - Small, frequent PRs beat one giant one.
