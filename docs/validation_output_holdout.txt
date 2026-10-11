@@ -1,0 +1,42 @@
+Validation of data/holdout
+
+[PASS] 1. Sub-meters against the main meter
+       Main meter is 'main' (largest total), with 8 sub-meters. Over the 17,507 intervals where every meter has a valid reading the sub-meters sum to 3,496,132 kWh against 3,544,911 kWh on main: gap 1.38%, tolerance 6.0% (stated in dataset_meta.json).
+       Within tolerance. The gap is unmetered load plus measurement noise; meters are never rescaled to close it.
+       Day by day the gap runs from 0.99% to 4.93%; 0 of 183 days are outside tolerance.
+
+[WARN] 2. Negative readings and meter resets
+       1 negative reading(s). Consumption cannot be negative: each is a counter reset and must be replaced, not summed.
+         lighting at 2026-08-27 23:15 UTC: kwh = -4,535.46
+
+[WARN] 3. Timestamps regular, on the 15-minute grid, in one time zone
+       All 158,052 timestamps carry an explicit UTC designator.
+       Grid runs 2026-04-01 00:00 to 2026-09-30 23:45 UTC: 17,568 intervals expected for each of 9 meters.
+       60 missing intervals in 2 gap(s). They must be imputed and flagged, not silently treated as zero.
+         furnace: 2026-05-03 18:00 to 2026-05-04 05:45 UTC, 48 intervals
+         main: 2026-09-19 09:00 to 2026-09-19 11:45 UTC, 12 intervals
+
+[PASS] 4. Tariff windows contiguous and covering every metered interval
+         2026-04-01 up to 2026-07-01 (exclusive): peak 6.34, off_peak 4.7
+         2026-07-01 up to 2026-09-03 (exclusive): peak 6.64, off_peak 4.96
+         2026-09-03 up to 2026-10-01 (exclusive): peak 6.89, off_peak 5.21
+       3 window(s), contiguous, no overlaps.
+       Every metered interval falls inside a window.
+       The price changes on 2026-09-03, part-way through 2026-Q3: that quarter must be priced interval by interval, not at one rate.
+
+[WARN] 5. Production days against the shift calendar
+       183 days, 3 products: 156 logged as working days, 27 as holiday or shut down.
+       Every metered day has production rows.
+       Every metered day has a weather row.
+       2026-09-02 is logged as '3-shift' and not a holiday, but produced 208 units, 6% of a normal working day; the main meter used 11% of a normal working day's energy. Suspected holiday logged as a normal shift.
+
+[PASS] 6. Row counts and the Annex B columns
+       meter_15min   158,052 rows
+       tariff              6 rows   extra columns: peak_start_hour, peak_end_hour
+       production        549 rows
+       weather           183 rows
+       Rows per meter: chillers 17,568, compressors 17,568, furnace 17,520, hvac 17,568, lighting 17,568, line_1 17,568, line_2 17,568, line_3 17,568, main 17,556
+
+Result: 3 passed, 3 with warnings, 0 failed.
+WARN is something real in the data that the cleaning step must handle and report.
+FAIL means the files cannot be used as they are.
