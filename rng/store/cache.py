@@ -16,17 +16,33 @@ Write with INSERT OR REPLACE so a reload through /ingest overwrites cleanly.
 
 from __future__ import annotations
 
+import json
+from datetime import UTC, datetime
 from typing import Any
 
 import duckdb
 
 
+def _key(compare_to: str | None) -> str:
+    return "" if compare_to is None else compare_to
+
+
 def put(con: duckdb.DuckDBPyConnection, dataset_id: str, kind: str, period: str,
         payload: dict[str, Any], compare_to: str | None = None) -> None:
-    raise NotImplementedError
+    # Some payloads are lists (asset_totals, findings); anything JSON-able goes.
+    con.execute(
+        "INSERT OR REPLACE INTO analysis_cache "
+        "(dataset_id, kind, period, compare_to, payload, computed_at) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        [dataset_id, kind, period, _key(compare_to),
+         json.dumps(payload, default=str), datetime.now(UTC)])
 
 
 def get(con: duckdb.DuckDBPyConnection, dataset_id: str, kind: str, period: str,
         compare_to: str | None = None) -> dict[str, Any] | None:
     """The cached payload, or None if it was never computed."""
-    raise NotImplementedError
+    row = con.execute(
+        "SELECT payload FROM analysis_cache "
+        "WHERE dataset_id = ? AND kind = ? AND period = ? AND compare_to = ?",
+        [dataset_id, kind, period, _key(compare_to)]).fetchone()
+    return None if row is None else json.loads(row[0])
