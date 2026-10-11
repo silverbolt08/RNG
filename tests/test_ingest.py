@@ -7,7 +7,8 @@ import pandas as pd
 import pytest
 
 from rng.config import ROOT
-from rng.ingest.loader import load_csv, load_dir, main_meter
+from rng.ingest.clean import clean
+from rng.ingest.loader import RawTables, load_csv, load_dir, main_meter
 from rng.ingest.tariff import resolve_prices
 
 DATA = ROOT / "data"
@@ -116,3 +117,101 @@ def test_load_dir_reports_missing_file(tmp_path):
         for t in ("meter_15min", "tariff", "production"):
             (tmp_path / f"{t}.csv").write_text("x\n", encoding="utf-8")
         load_dir(tmp_path)
+
+
+# --------------------------------------------------------------------------
+# clean()
+# --------------------------------------------------------------------------
+
+def _raw(meter: pd.DataFrame, production: pd.DataFrame | None = None) -> RawTables:
+    if production is None:
+        production = pd.DataFrame({
+            "date": pd.to_datetime(["2026-04-01"]), "product": ["a"],
+            "units": pd.array([10], dtype="Int64"), "shift_pattern": ["2-shift"],
+            "is_holiday": pd.array([False], dtype="boolean")})
+    weather = pd.DataFrame({"date": pd.to_datetime(["2026-04-01"]), "avg_temp_c": [20.0],
+                            "cooling_degree_days": [2.0], "heating_degree_days": [0.0]})
+    tariff = pd.DataFrame({"valid_from": pd.to_datetime(["2026-04-01"], utc=True),
+                           "valid_to": pd.to_datetime(["2026-05-01"], utc=True),
+                           "period": ["flat"], "price_per_kwh": [5.0]})
+    return RawTables(meter, tariff, production, weather)
+
+
+def _meter(n: int = 3 * 96) -> pd.DataFrame:
+    ts = pd.date_range("2026-04-01", periods=n, freq="15min", tz="UTC")
+    sub = pd.DataFrame({"meter_id": "sub", "ts": ts, "kwh": 1.0})
+    main = pd.DataFrame({"meter_id": "main", "ts": ts, "kwh": 1.02})
+    return pd.concat([main, sub], ignore_index=True)
+
+
+def test_primary_report_lists_three_gaps_and_one_reset():
+    tables, report = clean(load_dir(DATA / "primary"))
+    assert len(report.gaps) == 3
+    assert report.resets_adjusted == 1
+    assert report.reconciliation_ok
+    assert report.suspected_holidays            # the mislabelled working day
+    m = tables.meter
+    assert (m["kwh"] >= 0).all() and m["kwh"].notna().all()
+    assert int(m["imputed"].sum()) == sum(g["rows"] for g in report.gaps)
+    # Every meter now sits on the same regular grid.
+    per_meter = m.groupby("meter_id")["ts"].agg(["count", "min", "max"])
+    assert per_meter["count"].nunique() == 1
+    assert (m.groupby("meter_id")["ts"].diff().dropna() == pd.Timedelta("15min")).all()
+
+
+def test_holdout_is_cleaned_too():
+    tables, report = clean(load_dir(DATA / "holdout"))
+    assert report.gaps and report.resets_adjusted == 1
+    assert tables.production["suspected_holiday"].any()
+
+
+def test_gap_is_imputed_and_flagged():
+    meter = _meter()
+    drop = (meter["meter_id"] == "sub") & meter["ts"].between(
+        pd.Timestamp("2026-04-02T02:00Z"), pd.Timestamp("2026-04-02T03:45Z"))
+    tables, report = clean(_raw(meter[~drop]))
+    sub = tables.meter[tables.meter["meter_id"] == "sub"]
+    assert sub["imputed"].sum() == 8
+    assert report.gaps == [{"meter_id": "sub", "from": "2026-04-02T02:00:00+00:00",
+                            "to": "2026-04-02T03:45:00+00:00", "rows": 8}]
+    np.testing.assert_allclose(sub["kwh"], 1.0)
+
+
+def test_reset_is_replaced_from_neighbours():
+    meter = _meter()
+    meter.loc[10, "kwh"] = -4000.0
+    tables, report = clean(_raw(meter))
+    row = tables.meter[(tables.meter["meter_id"] == "main")].iloc[10]
+    assert row["reset_adj"] and not row["imputed"]
+    assert row["kwh"] == pytest.approx(1.02)
+    assert report.resets_adjusted == 1
+
+
+def test_duplicates_are_dropped_and_counted():
+    meter = _meter()
+    tables, report = clean(_raw(pd.concat([meter, meter.iloc[:5]], ignore_index=True)))
+    assert report.duplicates_dropped == 5
+    assert len(tables.meter) == len(meter)
+
+
+def test_meters_are_never_rescaled_to_agree():
+    meter = _meter()
+    meter.loc[meter["meter_id"] == "main", "kwh"] = 2.0     # subs cover only half
+    tables, report = clean(_raw(meter))
+    assert not report.reconciliation_ok
+    assert report.reconciliation_gap_pct == pytest.approx(50.0)
+    np.testing.assert_allclose(tables.meter.loc[tables.meter["meter_id"] == "sub", "kwh"], 1.0)
+    assert tables.main_meter == "main"
+
+
+def test_near_zero_working_day_is_a_suspected_holiday():
+    dates = pd.to_datetime(["2026-04-01", "2026-04-02", "2026-04-03", "2026-04-04",
+                            "2026-04-05"])
+    production = pd.DataFrame({
+        "date": dates, "product": "a",
+        "units": pd.array([100, 98, 3, 0, 101], dtype="Int64"),
+        "shift_pattern": ["2-shift", "2-shift", "2-shift", "down", "1-shift"],
+        "is_holiday": pd.array([False, False, False, False, False], dtype="boolean")})
+    tables, report = clean(_raw(_meter(), production))
+    assert report.suspected_holidays == ["2026-04-03"]
+    assert tables.production["suspected_holiday"].tolist() == [False, False, True, False, False]
