@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+!.env.example
+**/__pycache__
+.pytest_cache
+.ruff_cache
+*.duckdb
+*.duckdb.wal
+live_data
+*.pdf
+.vscode
+.idea
