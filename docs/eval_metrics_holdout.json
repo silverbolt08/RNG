@@ -1,0 +1,144 @@
+{
+  "cases": 29,
+  "passed": 19,
+  "errors": 0,
+  "answer_type_correct": 22,
+  "by_category": {
+    "decomposition": {
+      "cases": 2,
+      "passed": 1,
+      "minimum": null
+    },
+    "price_or_mix": {
+      "cases": 5,
+      "passed": 2,
+      "minimum": 3
+    },
+    "numeric": {
+      "cases": 5,
+      "passed": 3,
+      "minimum": 3
+    },
+    "recommendation": {
+      "cases": 4,
+      "passed": 4,
+      "minimum": null
+    },
+    "what_if": {
+      "cases": 3,
+      "passed": 3,
+      "minimum": 2
+    },
+    "unanswerable": {
+      "cases": 4,
+      "passed": 2,
+      "minimum": 2
+    },
+    "invent_number": {
+      "cases": 4,
+      "passed": 4,
+      "minimum": 2
+    },
+    "refusal": {
+      "cases": 2,
+      "passed": 0,
+      "minimum": null
+    }
+  },
+  "decomposition": {
+    "tariff": {
+      "true_pp": 6.6885,
+      "reported_pp": 6.7,
+      "mae_pp": 0.011499999999999844,
+      "range": [
+        6.68,
+        6.72
+      ],
+      "truth_in_range": true
+    },
+    "volume": {
+      "true_pp": 16.9655,
+      "reported_pp": 21.7,
+      "mae_pp": 4.734500000000001,
+      "range": [
+        21.65,
+        21.75
+      ],
+      "truth_in_range": false
+    },
+    "product_mix": {
+      "true_pp": -5.8327,
+      "reported_pp": -9.0,
+      "mae_pp": 3.1673,
+      "range": [
+        -9.66,
+        -8.62
+      ],
+      "truth_in_range": false
+    },
+    "weather": {
+      "true_pp": 1.7364,
+      "reported_pp": 1.31,
+      "mae_pp": 0.4263999999999999,
+      "range": [
+        1.24,
+        1.4
+      ],
+      "truth_in_range": false
+    },
+    "waste": {
+      "true_pp": 2.4425,
+      "reported_pp": 1.29,
+      "mae_pp": 1.1524999999999999,
+      "range": [
+        0.84,
+        1.93
+      ],
+      "truth_in_range": false
+    }
+  },
+  "bridges_scored": 9,
+  "total_rise": {
+    "true": 22.0002,
+    "reported": 21.998680159084387
+  },
+  "reconciliation": {
+    "passed": 12,
+    "of": 12
+  },
+  "waste": {
+    "leak_asset": "chillers",
+    "leak_found": true,
+    "detail": "recommends action on chillers",
+    "actions_on_other_assets": [],
+    "true_waste_pp": 2.4425,
+    "reported_waste_pp": 1.29
+  },
+  "savings": {
+    "in_range": true,
+    "detail": "true 133,371 kWh/yr inside [110,941, 157,167]"
+  },
+  "faithfulness": {
+    "traced": 29,
+    "faithful": 29,
+    "unaided": 0,
+    "regenerated": 0,
+    "fallback": 0,
+    "template": 20,
+    "unknown": 9,
+    "known": 0
+  },
+  "latency_ms": {
+    "p50": 108.55719999744906,
+    "p95": 465.0617599982064,
+    "server_p50": 11.29,
+    "server_p95": 229.90799999999925
+  },
+  "llm": {
+    "calls_total": 0,
+    "tokens_total": 0,
+    "calls_per_request": 0.0,
+    "calls_max": 0,
+    "tokens_per_request": 0.0
+  }
+}
