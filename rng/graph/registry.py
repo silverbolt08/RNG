@@ -38,6 +38,10 @@ _FORMATS = {
     "r2": "{:.2f}", "kWh": "{:,.0f}", "kW": "{:.1f}", "hours": "{:,.0f}",
     "months": "{:.1f}", "tCO2e": "{:,.1f}", "count": "{:.0f}",
 }
+# How a unit reads in the table handed to the writer. Internal unit codes must
+# not leak into prose ("36.8 share_pct").
+_UNIT_WORDS = {"pp": "percentage points", "share_pct": "%", "ratio": "(ratio)",
+               "r2": "", "count": "", "tCO2e": "tonnes CO2e"}
 
 
 @dataclass(frozen=True)
@@ -104,8 +108,9 @@ class Registry:
 
     def facts_table(self) -> str:
         """What the writer LLM is given. Nothing else reaches it."""
-        return "\n".join(f"- {e.label}: {e.display} {e.unit}"
-                         for e in self._entries.values() if e.unit != "quoted")
+        return "\n".join(
+            f"- {e.label}: {e.display} {_UNIT_WORDS.get(e.unit, e.unit)}".rstrip()
+            for e in self._entries.values() if e.unit != "quoted")
 
     # -- the check ---------------------------------------------------------
 
