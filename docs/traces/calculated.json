@@ -3,9 +3,9 @@
     "question": "Which assets use the most energy?"
   },
   "response": {
-    "run_id": "en-057cfd",
+    "run_id": "en-19a61e",
     "answer_type": "calculated",
-    "summary": "Based on measured sub-meter data, the furnace used 509,192 kWh with a share of the main meter of 36.8 % and a cost of 3,443,809 INR. Compressors used 210,455 kWh with a share of the main meter of 15.2 % and a cost of 1,301,946 INR. Line_1 used 143,107 kWh with a share of the main meter of 10.3 % and a cost of 964,629 INR. Line_2 used 126,813 kWh with a share of the main meter of 9.2 % and a cost of 854,513 INR. Hvac used 113,844 kWh with a share of the main meter of 8.2 % and a cost of 737,758 INR.",
+    "summary": "Based on measured sub-meter data for 2026-Q3, the furnace used 509,192 kWh with a 36.8 % share of the main meter and a cost of 3,443,809 INR. Compressors used 210,455 kWh, representing a 15.2 % share of the main meter and costing 1,301,946 INR. Line_1 used 143,107 kWh, taking a 10.3 % share of the main meter at a cost of 964,629 INR. Line_2 used 126,813 kWh with a 9.2 % share of the main meter and cost 854,513 INR, while hvac used 113,844 kWh, accounting for an 8.2 % share of the main meter and 737,758 INR.",
     "bridge": [],
     "recommendations": [],
     "assumptions": [
@@ -27,7 +27,7 @@
     "total_pct_points": null
   },
   "trace": {
-    "run_id": "en-057cfd",
+    "run_id": "en-19a61e",
     "question": "Which assets use the most energy?",
     "answer_type": "calculated",
     "steps": [
@@ -43,7 +43,7 @@
           "source": "gemini:gemini-3.5-flash-lite"
         },
         "check": null,
-        "ms": 1629.73
+        "ms": 1152.62
       },
       {
         "agent": "analyst",
@@ -73,7 +73,7 @@
           "served_from": "analysis_cache"
         },
         "check": null,
-        "ms": 1.13
+        "ms": 0.94
       },
       {
         "agent": "analyst",
@@ -90,7 +90,7 @@
           "hvac": 8.2
         },
         "check": null,
-        "ms": 1.96
+        "ms": 1.76
       },
       {
         "agent": "writer",
@@ -102,10 +102,10 @@
         },
         "output": {
           "writer": "llm",
-          "chars": 503
+          "chars": 512
         },
         "check": null,
-        "ms": 1550.47
+        "ms": 1330.48
       },
       {
         "agent": "writer",
@@ -118,12 +118,12 @@
           "writer": "llm"
         },
         "check": "all numbers match tool outputs",
-        "ms": 0.19
+        "ms": 0.24
       }
     ],
     "llm_calls": 2,
-    "tokens": 1119,
-    "latency_ms": 3186.31,
+    "tokens": 1195,
+    "latency_ms": 2488.7,
     "registry": [
       {
         "key": "asset.compressors.cost",

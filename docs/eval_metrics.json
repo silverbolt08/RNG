@@ -1,8 +1,8 @@
 {
   "cases": 29,
-  "passed": 22,
+  "passed": 29,
   "errors": 0,
-  "answer_type_correct": 22,
+  "answer_type_correct": 29,
   "by_category": {
     "decomposition": {
       "cases": 2,
@@ -11,12 +11,12 @@
     },
     "price_or_mix": {
       "cases": 5,
-      "passed": 3,
+      "passed": 5,
       "minimum": 3
     },
     "numeric": {
       "cases": 5,
-      "passed": 4,
+      "passed": 5,
       "minimum": 3
     },
     "recommendation": {
@@ -31,7 +31,7 @@
     },
     "unanswerable": {
       "cases": 4,
-      "passed": 2,
+      "passed": 4,
       "minimum": 2
     },
     "invent_number": {
@@ -41,7 +41,7 @@
     },
     "refusal": {
       "cases": 2,
-      "passed": 0,
+      "passed": 2,
       "minimum": null
     }
   },
@@ -58,7 +58,7 @@
     },
     "volume": {
       "true_pp": 0.2707,
-      "reported_pp": -0.07,
+      "reported_pp": -0.07000000000000002,
       "mae_pp": 0.3407,
       "range": [
         -0.08,
@@ -68,8 +68,8 @@
     },
     "product_mix": {
       "true_pp": 2.8744,
-      "reported_pp": 3.79,
-      "mae_pp": 0.9156,
+      "reported_pp": 3.7899999999999996,
+      "mae_pp": 0.9155999999999999,
       "range": [
         3.23,
         4.09
@@ -78,8 +78,8 @@
     },
     "weather": {
       "true_pp": 1.6075,
-      "reported_pp": 1.2,
-      "mae_pp": 0.4075,
+      "reported_pp": 1.1999999999999997,
+      "mae_pp": 0.4074999999999999,
       "range": [
         1.14,
         1.27
@@ -88,7 +88,7 @@
     },
     "waste": {
       "true_pp": 1.5242,
-      "reported_pp": 1.37,
+      "reported_pp": 1.3700000000000003,
       "mae_pp": 0.1541999999999999,
       "range": [
         1.03,
@@ -97,14 +97,14 @@
       "truth_in_range": true
     }
   },
-  "bridges_scored": 9,
+  "bridges_scored": 12,
   "total_rise": {
     "true": 14.9996,
     "reported": 14.999575209253662
   },
   "reconciliation": {
-    "passed": 12,
-    "of": 12
+    "passed": 15,
+    "of": 15
   },
   "waste": {
     "leak_asset": "compressors",
@@ -112,7 +112,7 @@
     "detail": "recommends action on compressors",
     "actions_on_other_assets": [],
     "true_waste_pp": 1.5242,
-    "reported_waste_pp": 1.37
+    "reported_waste_pp": 1.3700000000000003
   },
   "savings": {
     "in_range": true,
@@ -121,24 +121,24 @@
   "faithfulness": {
     "traced": 29,
     "faithful": 29,
-    "unaided": 0,
+    "unaided": 8,
     "regenerated": 0,
     "fallback": 0,
-    "template": 20,
-    "unknown": 9,
-    "known": 0
+    "template": 13,
+    "unknown": 8,
+    "known": 8
   },
   "latency_ms": {
-    "p50": 127.78790000083973,
-    "p95": 507.37853999962624,
-    "server_p50": 12.95,
-    "server_p95": 243.82799999999918
+    "p50": 780.9842000001481,
+    "p95": 2931.9131800001737,
+    "server_p50": 678.53,
+    "server_p95": 2823.0699999999997
   },
   "llm": {
-    "calls_total": 0,
-    "tokens_total": 0,
-    "calls_per_request": 0.0,
-    "calls_max": 0,
-    "tokens_per_request": 0.0
+    "calls_total": 47,
+    "tokens_total": 12658,
+    "calls_per_request": 1.6206896551724137,
+    "calls_max": 2,
+    "tokens_per_request": 436.48275862068965
   }
 }

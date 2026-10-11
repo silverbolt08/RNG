@@ -3,9 +3,9 @@
     "question": "Why did the electricity bill go up?"
   },
   "response": {
-    "run_id": "en-b315de",
+    "run_id": "en-4d833f",
     "answer_type": "decomposition",
-    "summary": "The electricity bill went up to 9,160,290 INR in 2026-Q3 from 7,965,499 INR in 2026-Q2, representing a 15.0 % change. The primary drivers in order of size are tariff (price), product mix, weather, and production volume, which contributed 8.7 percentage points, 3.8 percentage points, 1.2 percentage points, and -0.1 percentage points respectively. An additional factor is waste, contributing 1.4 percentage points of the bill, with a low estimate of 1.0 percentage points and a high estimate of 1.9 percentage points. Further analysis points to compressors, with an estimated waste of 131,052 kWh per year.",
+    "summary": "The electricity bill for 2026-Q3 rose to 9,160,290 INR compared to 7,965,499 INR for 2026-Q2, representing a change of 15.0 %. The causes in order of size are tariff (price), product mix, weather, and production volume. The effect of tariff (price) was 8.7 percentage points or 694,778 INR, while the effect of product mix was 3.8 percentage points or 301,556 INR. Additional drivers included weather at 1.2 percentage points or 95,423 INR, waste at 1.4 percentage points or 108,837 INR, and production volume at -0.1 percentage points or -5,803 INR. Evidence of waste points to compressors, which draw about 15.0 kW more when the plant is idle from 2026-08-03 onward, with an estimated waste of 131,052 kWh per year.",
     "bridge": [
       {
         "cause": "tariff",
@@ -53,7 +53,55 @@
         "amount": 108837.01
       }
     ],
-    "recommendations": [],
+    "recommendations": [
+      {
+        "action": "Find and repair the continuous loss on compressors",
+        "rationale": "compressors draws about 15.0 kW more when the plant is idle from 2026-08-03 onward, after its weather response is removed, and on 100% of days since. Load that does not stop when production stops is the signature of a leak or a stuck unit. Its night load now runs at 37% of its daytime load. Assumes 60%-85% of 131,052 kWh a year is recoverable, priced at INR 5.75 per kWh (latest tariff, time-weighted). Fix cost INR 45,000-90,000 is our estimate and is not in the data.",
+        "evidence_refs": [
+          "idle_floor:compressors:2026-Q2..2026-Q3",
+          "bridge:waste:2026-Q2..2026-Q3",
+          "finding:leak:compressors:2026-08-03"
+        ],
+        "confidence": "high",
+        "estimated_impact": {
+          "saving_kwh_per_year": [
+            78631.0,
+            111395.0
+          ],
+          "saving_money_per_year": [
+            452187.0,
+            640598.0
+          ],
+          "saving_co2e_t_per_year": [
+            55.83,
+            79.09
+          ],
+          "payback_months": [
+            0.8,
+            2.4
+          ],
+          "ease": "easy"
+        },
+        "requires_approval": true,
+        "saving_kwh_per_year": [
+          78631.0,
+          111395.0
+        ],
+        "saving_money_per_year": [
+          452187.0,
+          640598.0
+        ],
+        "saving_co2e_t_per_year": [
+          55.83,
+          79.09
+        ],
+        "payback_months": [
+          0.8,
+          2.4
+        ],
+        "ease": "easy"
+      }
+    ],
     "assumptions": [
       "No period was given, so the latest one in the data (2026-Q3) was used.",
       "No comparison period was given, so the one before it (2026-Q2) was used.",
@@ -75,7 +123,7 @@
     "total_pct_points": 14.999575209253662
   },
   "trace": {
-    "run_id": "en-b315de",
+    "run_id": "en-4d833f",
     "question": "Why did the electricity bill go up?",
     "answer_type": "decomposition",
     "steps": [
@@ -91,7 +139,7 @@
           "source": "gemini:gemini-3.5-flash-lite"
         },
         "check": null,
-        "ms": 3446.7
+        "ms": 2287.33
       },
       {
         "agent": "analyst",
@@ -106,7 +154,7 @@
           "in_scope": true
         },
         "check": null,
-        "ms": 0.01
+        "ms": 0.02
       },
       {
         "agent": "analyst",
@@ -121,7 +169,7 @@
           "served_from": "analysis_cache"
         },
         "check": null,
-        "ms": 1.12
+        "ms": 1.59
       },
       {
         "agent": "analyst",
@@ -134,7 +182,7 @@
           "r2": 1.0
         },
         "check": null,
-        "ms": 3.99
+        "ms": 4.06
       },
       {
         "agent": "analyst",
@@ -153,7 +201,7 @@
           "total": 15.0
         },
         "check": null,
-        "ms": 3.99
+        "ms": 4.06
       },
       {
         "agent": "analyst",
@@ -167,22 +215,22 @@
           "asset": "compressors"
         },
         "check": null,
-        "ms": 3.99
+        "ms": 4.06
       },
       {
         "agent": "writer",
         "tool": "write_finance_brief",
         "seq": 7,
         "input": {
-          "facts": 28,
+          "facts": 45,
           "attempt": 1
         },
         "output": {
           "writer": "llm",
-          "chars": 606
+          "chars": 717
         },
         "check": null,
-        "ms": 1230.12
+        "ms": 1424.21
       },
       {
         "agent": "writer",
@@ -190,17 +238,17 @@
         "seq": 8,
         "input": null,
         "output": {
-          "numerals": 11,
+          "numerals": 15,
           "unmatched": 0,
           "writer": "llm"
         },
         "check": "all numbers match tool outputs",
-        "ms": 0.2
+        "ms": 0.5
       }
     ],
     "llm_calls": 2,
-    "tokens": 1255,
-    "latency_ms": 4687.52,
+    "tokens": 1637,
+    "latency_ms": 3725.02,
     "registry": [
       {
         "key": "baseline.r2",
@@ -396,6 +444,125 @@
         "value": 37.0,
         "unit": "quoted",
         "source_tool": "detect_leaks",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.co2e.high",
+        "value": 79.09,
+        "unit": "tCO2e",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.co2e.low",
+        "value": 55.83,
+        "unit": "tCO2e",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.kwh.high",
+        "value": 111395.0,
+        "unit": "kWh",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.kwh.low",
+        "value": 78631.0,
+        "unit": "kWh",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.money.high",
+        "value": 640598.0,
+        "unit": "INR",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.money.low",
+        "value": 452187.0,
+        "unit": "INR",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.payback.high",
+        "value": 2.4,
+        "unit": "months",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.payback.low",
+        "value": 0.8,
+        "unit": "months",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.quoted.0",
+        "value": 15.0,
+        "unit": "quoted",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.quoted.1",
+        "value": 100.0,
+        "unit": "quoted",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.quoted.2",
+        "value": 37.0,
+        "unit": "quoted",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.quoted.3",
+        "value": 60.0,
+        "unit": "quoted",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.quoted.4",
+        "value": -85.0,
+        "unit": "quoted",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.quoted.5",
+        "value": 131052.0,
+        "unit": "quoted",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.quoted.6",
+        "value": 5.75,
+        "unit": "quoted",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.quoted.7",
+        "value": 45000.0,
+        "unit": "quoted",
+        "source_tool": "estimate_savings",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "rec.0.quoted.8",
+        "value": 90000.0,
+        "unit": "quoted",
+        "source_tool": "estimate_savings",
         "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
       }
     ]

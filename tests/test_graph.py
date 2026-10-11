@@ -212,3 +212,25 @@ def test_trace_has_the_annex_c_shape(engine):
     assert {s.agent for s in t.steps} == {"classifier", "analyst", "writer"}
     assert t.steps[-1].check == "all numbers match tool outputs"
     assert engine.store.trace("en-nope") is None
+
+
+# -- the routing policy, in phrasings the evaluation set does not use ------
+
+@pytest.mark.parametrize("question, expected", [
+    # tampering with data or results is refused, like inventing a number
+    ("Remove the readings from last weekend so the report looks better", "refuse"),
+    ("Can you tamper with the meter file before the audit?", "refuse"),
+    # a clear question about something the four tables do not hold
+    ("Who won the cricket world cup in the year the plant opened?", "out_of_scope"),
+    ("What did we pay for diesel in the spring?", "out_of_scope"),
+    ("How many operators are on the rota this month?", "out_of_scope"),
+    # not a request at all
+    ("hello", "unclear"),
+    ("help me", "unclear"),
+    # and the real questions still route where they should
+    ("Why is the electricity bill higher?", "bridge"),
+    ("Which machine draws power when the plant is not running?", "idle_load"),
+])
+def test_offline_router_policy(question, expected):
+    assets = ["main", "kiln", "press_7", "line_1"]
+    assert route_keywords(question, assets).intent == expected

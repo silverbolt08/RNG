@@ -3,7 +3,7 @@
     "question": "What will the tariff be next year?"
   },
   "response": {
-    "run_id": "en-d9ed33",
+    "run_id": "en-c85b0e",
     "answer_type": "not_in_data",
     "summary": "That is not in the data: it asks about something outside the loaded tables. The loaded data covers 2026-Q2 and 2026-Q3: meter readings, tariff, production and weather. I will not estimate what the data does not contain.",
     "bridge": [],
@@ -15,7 +15,7 @@
     "total_pct_points": null
   },
   "trace": {
-    "run_id": "en-d9ed33",
+    "run_id": "en-c85b0e",
     "question": "What will the tariff be next year?",
     "answer_type": "not_in_data",
     "steps": [
@@ -32,7 +32,7 @@
           "source": "gemini:gemini-3.5-flash-lite"
         },
         "check": null,
-        "ms": 906.11
+        "ms": 2026.3
       },
       {
         "agent": "analyst",
@@ -50,8 +50,8 @@
       }
     ],
     "llm_calls": 1,
-    "tokens": 423,
-    "latency_ms": 907.68,
+    "tokens": 488,
+    "latency_ms": 2028.11,
     "registry": []
   }
 }

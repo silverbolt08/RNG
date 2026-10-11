@@ -33,11 +33,25 @@ _REFUSE = ("ignore your", "ignore the", "ignore previous", "ignore all",
            "without using", "don't use the data", "do not use the data",
            "skip the calculation", "your best guess", "any number will do",
            "system prompt", "say that the", "tell me that the", "assume the waste is",
-           "round it up to", "real company", "competitor")
+           "round it up to", "real company", "competitor",
+           # tampering with the data or the result is the same request
+           "delete", "falsify", "tamper", "manipulate", "doctor the", "cover up",
+           "hide the", "remove the reading", "drop the reading", "alter the",
+           "change the data", "edit the data", "look lower", "looks lower",
+           "look better", "looks better")
 _OUT_OF_SCOPE = ("next year", "next quarter", "next month", "forecast", "predict",
                  "will the tariff", "will be", "in the future", "going to be",
-                 "solar", "headcount", "salary", "revenue", "profit", "gas bill",
-                 "water", "stock price", "weather tomorrow")
+                 "solar", "headcount", "salary", "revenue", "profit",
+                 "stock price", "weather tomorrow",
+                 # other utilities and fuels: this is the electricity bill only
+                 "natural gas", "gas bill", " gas", "diesel", "fuel", "water",
+                 "steam")
+# What the four tables are about. A full sentence that mentions none of it is
+# a question about something else; a fragment is merely unclear.
+_ON_TOPIC = ("bill", "energy", "electric", "kwh", "power", "tariff", "price",
+             "meter", "cost", "consum", "usage", "load", "saving", "waste",
+             "units", "output", "temperature", "weather", "emission", "co2",
+             "carbon", "peak", "asset", "machine")
 
 
 @dataclass
@@ -108,7 +122,8 @@ def route_keywords(question: str, assets: list[str]) -> Intent:
                           "a stated percentage, and fixing the identified waste")
     elif _has(q, *_OUT_OF_SCOPE):
         out.intent, out.reason = "out_of_scope", "it asks about something outside the loaded tables"
-    elif _has(q, "idle", "nothing is produced", "no production", "not producing",
+    elif _has(q, "idle", "nothing is produced", "nothing is being", "nothing being",
+              "nothing was", "no production", "not producing",
               "not running", "standby", "at night", "weekend", "base load",
               "baseload", "when the plant is"):
         out.intent = "idle_load"
@@ -118,20 +133,31 @@ def route_keywords(question: str, assets: list[str]) -> Intent:
     elif _has(q, "what should we do", "recommend", "saving", "save ", "action",
               "do first", "reduce the bill", "cut the bill", "fix"):
         out.intent = "savings"
-    elif _has(q, "most energy", "top user", "biggest", "largest", "which asset",
-              "which machine", "which meter", "by asset", "by meter", "breakdown by",
-              "use the most", "uses the most", "consume", "share of"):
+    # A ranking word alone is not a question about assets: "the biggest driver
+    # of the increase" asks about causes. It needs something to rank.
+    elif (_has(q, "most energy", "top user", "which asset", "which machine",
+               "which meter", "by asset", "by meter", "breakdown by",
+               "use the most", "uses the most", "consume", "share of")
+          or (_has(q, "biggest", "largest", "highest", "top ", "most")
+              and _has(q, "asset", "machine", "meter", "equipment", "user",
+                       "consumer"))):
         out.intent = "top_users"
     elif _has(q, "why", "go up", "went up", "gone up", "increase", "rise", "rose",
               "higher", "decompos", "split", "bridge", "cause", "driver",
               "tariff", "mix", "volume", "weather", "waste", "blame", "explain",
-              "leak", "fault", "machine", "wasted"):
+              "leak", "fault", "machine", "wasted", "change", "percentage",
+              "efficien", "per unit", "product", "produc", "make more",
+              "made more", "price", "hotter", "temperature", "due to"):
         out.intent = "bridge"
     elif _has(q, "how much", "total bill", "total cost", "spend", "spent",
               "what was the bill", "bill for"):
         out.intent = "bill_total"
     elif out.asset:
         out.intent = "top_users"
+    elif len(q.split()) >= 4 and not _has(q, *_ON_TOPIC):
+        out.intent = "out_of_scope"
+        out.reason = ("it is not about the electricity bill, and the data holds "
+                      "only meter readings, tariff, production and weather")
     else:
         out.reason = "the request does not say what to analyse"
     return out
@@ -153,9 +179,14 @@ Intents:
   savings       what to do, which actions save money
   ranking       which action pays back fastest
   what_if       a tariff change by a percentage, or fixing the identified waste
-  out_of_scope  forecasts, or anything not in meter/tariff/production/weather data
-  refuse        asks for an invented, guessed or unsupported number
-  unclear       cannot tell what is being asked
+  out_of_scope  a clear request whose answer is NOT in the meter, tariff, production
+                or weather tables: forecasts, other utilities or fuels (gas, water),
+                staffing, finance, general knowledge, or any task unrelated to the
+                electricity bill
+  refuse        asks to invent, guess or assume a number, or to alter, delete,
+                hide or falsify data or results
+  unclear       is about the electricity bill but too vague to tell which analysis
+                is wanted, or is not a request at all (a greeting)
 
 Periods in the data: {periods}
 Meters in the data: {assets}
