@@ -129,6 +129,6 @@
   "profile": "primary",
   "seed": 7,
   "target_rise_pct": 15.0,
-  "generated_at": "2026-10-11T08:12:32+00:00",
+  "generated_at": "2026-10-11T08:48:44+00:00",
   "generator": "rng/data/generator.py"
 }

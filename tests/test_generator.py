@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from rng.data.generator import CAUSES, METERS, PROFILES, build, shapley
+from rng.data.generator import CAUSES, PROFILES, build, shapley
 
 TARGET = 0.15
 SEED = 7

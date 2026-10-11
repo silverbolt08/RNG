@@ -123,6 +123,6 @@
   "profile": "holdout",
   "seed": 4201,
   "target_rise_pct": 22.0,
-  "generated_at": "2026-10-11T08:12:33+00:00",
+  "generated_at": "2026-10-11T08:48:45+00:00",
   "generator": "rng/data/generator.py"
 }

@@ -1,0 +1,33 @@
+# Pinned. Python 3.11 or 3.12 (see pyproject.toml).
+# Versions verified against the index on 2026-10-11.
+
+# API
+fastapi==0.136.3
+uvicorn[standard]==0.49.0
+pydantic==2.13.4
+python-multipart==0.0.32
+
+# Orchestration
+langgraph==1.2.1
+langchain-core==1.4.0
+
+# Store
+duckdb==1.5.6
+
+# Analytics
+pandas==2.3.3
+numpy==2.3.3
+scikit-learn==1.7.2
+plotly==6.3.1
+
+# UI
+streamlit==1.65.0
+httpx==0.28.1
+
+# LLM (Gemini). MOCK_LLM=true runs the whole system without it.
+google-genai==1.75.0
+python-dotenv==1.2.2
+
+# Dev
+pytest==9.0.3
+ruff==0.17.0

@@ -48,3 +48,7 @@ logs/
 *.sqlite
 *.sqlite3
 *.db
+
+# DuckDB store (rebuilt from data/ at startup)
+*.duckdb
+*.duckdb.wal

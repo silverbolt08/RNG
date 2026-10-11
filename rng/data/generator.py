@@ -23,8 +23,8 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
-from functools import lru_cache
+from datetime import UTC, date, datetime, timedelta
+from functools import cache
 from itertools import combinations
 from math import factorial
 from pathlib import Path
@@ -104,7 +104,7 @@ class Tariff:
         # Walk backwards so the earliest window wins for early timestamps and
         # anything past the final window clamps to the final price. A
         # counterfactual applies one quarter's prices to the other's calendar.
-        for start, end, pk, op in reversed(self.windows):
+        for _start, end, pk, op in reversed(self.windows):
             m = day <= pd.Timestamp(end)
             peak[m] = pk
             off[m] = op
@@ -534,7 +534,7 @@ def build(cfg: dict, target_rise: float, seed: int):
     ts_cur, m_cur, prod_cur, wx_cur = simulate(cur, noise, cfg["leak"])
     actual_cur = bill(ts_cur, m_cur["main"], cur.tariff)
 
-    @lru_cache(maxsize=None)
+    @cache
     def cost_of(active: frozenset) -> float:
         d = blend(ref, cur, active)
         ts, m, _, _ = simulate(d, noise, leak=None)
@@ -682,7 +682,7 @@ def main() -> None:
         "profile": args.profile,
         "seed": seed,
         "target_rise_pct": round(100.0 * target, 2),
-        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "generator": "rng/data/generator.py",
     })
     (out / "ground_truth.json").write_text(
@@ -695,6 +695,7 @@ def main() -> None:
         "peak_start_hour": cfg["cur_tariff"].peak_start_hour,
         "peak_end_hour": cfg["cur_tariff"].peak_end_hour,
         "peak_applies_on_weekends": False,
+        "clock_hours_timezone": "UTC",
         "tariff_window_convention": (
             "[valid_from, valid_to) -- valid_to is exclusive"),
         "submeter_reconciliation_tolerance_pct": 6.0,
