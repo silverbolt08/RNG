@@ -1,0 +1,57 @@
+{
+  "request": {
+    "question": "hello"
+  },
+  "response": {
+    "run_id": "en-74abe6",
+    "answer_type": "clarification_needed",
+    "summary": "I need one more detail: the request does not say what to analyse. The loaded data covers 2026-Q2 and 2026-Q3. Meters in the data: chillers, compressors, furnace, hvac, lighting, line_1, line_2, line_3 and main.",
+    "bridge": [],
+    "recommendations": [],
+    "assumptions": [],
+    "limitations": [
+      "No analysis was run for this request."
+    ],
+    "total_pct_points": null
+  },
+  "trace": {
+    "run_id": "en-74abe6",
+    "question": "hello",
+    "answer_type": "clarification_needed",
+    "steps": [
+      {
+        "agent": "classifier",
+        "tool": "classify_request",
+        "seq": 1,
+        "input": {
+          "question": "hello"
+        },
+        "output": {
+          "intent": "unclear",
+          "reason": "the request does not say what to analyse",
+          "source": "gemini:gemini-3.5-flash-lite"
+        },
+        "check": null,
+        "ms": 969.36
+      },
+      {
+        "agent": "analyst",
+        "tool": "guard",
+        "seq": 2,
+        "input": {
+          "intent": "unclear"
+        },
+        "output": {
+          "answer_type": "clarification_needed",
+          "reason": "the request does not say what to analyse"
+        },
+        "check": null,
+        "ms": 0.0
+      }
+    ],
+    "llm_calls": 1,
+    "tokens": 413,
+    "latency_ms": 971.28,
+    "registry": []
+  }
+}

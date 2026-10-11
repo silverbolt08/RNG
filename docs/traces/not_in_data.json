@@ -1,0 +1,57 @@
+{
+  "request": {
+    "question": "What will the tariff be next year?"
+  },
+  "response": {
+    "run_id": "en-bed1de",
+    "answer_type": "not_in_data",
+    "summary": "That is not in the data: it asks about something outside the loaded tables. The loaded data covers 2026-Q2 and 2026-Q3: meter readings, tariff, production and weather. I will not estimate what the data does not contain.",
+    "bridge": [],
+    "recommendations": [],
+    "assumptions": [],
+    "limitations": [
+      "No analysis was run for this request."
+    ],
+    "total_pct_points": null
+  },
+  "trace": {
+    "run_id": "en-bed1de",
+    "question": "What will the tariff be next year?",
+    "answer_type": "not_in_data",
+    "steps": [
+      {
+        "agent": "classifier",
+        "tool": "classify_request",
+        "seq": 1,
+        "input": {
+          "question": "What will the tariff be next year?"
+        },
+        "output": {
+          "intent": "out_of_scope",
+          "reason": "it asks about something outside the loaded tables",
+          "source": "gemini:gemini-3.5-flash-lite"
+        },
+        "check": null,
+        "ms": 1330.9
+      },
+      {
+        "agent": "analyst",
+        "tool": "guard",
+        "seq": 2,
+        "input": {
+          "intent": "out_of_scope"
+        },
+        "output": {
+          "answer_type": "not_in_data",
+          "reason": "it asks about something outside the loaded tables"
+        },
+        "check": null,
+        "ms": 0.0
+      }
+    ],
+    "llm_calls": 1,
+    "tokens": 423,
+    "latency_ms": 1332.56,
+    "registry": []
+  }
+}

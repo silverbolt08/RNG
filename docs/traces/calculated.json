@@ -1,0 +1,235 @@
+{
+  "request": {
+    "question": "Which assets use the most energy?"
+  },
+  "response": {
+    "run_id": "en-8e71b2",
+    "answer_type": "calculated",
+    "summary": "Based on measured sub-meter data, the furnace used 509,192 kWh with a share of the main meter of 36.8 % and cost 3,443,809 INR in 2026-Q3. Compressors used 210,455 kWh with a share of the main meter of 15.2 % and cost 1,301,946 INR. Line_1 used 143,107 kWh with a share of the main meter of 10.3 % and cost 964,629 INR. Line_2 used 126,813 kWh with a share of the main meter of 9.2 % and cost 854,513 INR, while hvac used 113,844 kWh with a share of the main meter of 8.2 % and cost 737,758 INR.",
+    "bridge": [],
+    "recommendations": [],
+    "assumptions": [
+      "No period was given, so the latest one in the data (2026-Q3) was used.",
+      "Emission factor 0.71 kg CO2e per kWh (stated in dataset_meta.json).",
+      "Peak tariff hours taken as 09:00-21:00, weekdays only UTC; Annex B's tariff table names the period but not the hours (stated in dataset_meta.json).",
+      "All clock hours (shifts, peak window, night load) are read in UTC, the time zone of the meter timestamps; no site-local conversion is applied.",
+      "Recovery fraction 60%-85% of identified waste is actually recoverable (our assumption, not in the data).",
+      "Fix costs are our estimates and are not present in any input file; payback ranges inherit their uncertainty.",
+      "Sub-meter totals are reconciled to the main meter within 6.0%.",
+      "All money in INR."
+    ],
+    "limitations": [
+      "Sub-meters do not sum exactly to the main meter; shares are of the main meter reading.",
+      "144 missing meter intervals were imputed.",
+      "1 meter reset(s) were corrected.",
+      "Days logged as normal shifts but with near-zero production were treated as holidays: 2026-09-07."
+    ],
+    "total_pct_points": null
+  },
+  "trace": {
+    "run_id": "en-8e71b2",
+    "question": "Which assets use the most energy?",
+    "answer_type": "calculated",
+    "steps": [
+      {
+        "agent": "classifier",
+        "tool": "classify_request",
+        "seq": 1,
+        "input": {
+          "question": "Which assets use the most energy?"
+        },
+        "output": {
+          "intent": "top_users",
+          "source": "gemini:gemini-3.5-flash-lite"
+        },
+        "check": null,
+        "ms": 1090.49
+      },
+      {
+        "agent": "analyst",
+        "tool": "guard",
+        "seq": 2,
+        "input": {
+          "intent": "top_users"
+        },
+        "output": {
+          "period": "2026-Q3",
+          "compare_to": null,
+          "in_scope": true
+        },
+        "check": null,
+        "ms": 0.01
+      },
+      {
+        "agent": "analyst",
+        "tool": "load_analysis",
+        "seq": 3,
+        "input": {
+          "period": "2026-Q3",
+          "compare_to": null
+        },
+        "output": {
+          "dataset_id": "primary-s7-r150",
+          "served_from": "analysis_cache"
+        },
+        "check": null,
+        "ms": 1.47
+      },
+      {
+        "agent": "analyst",
+        "tool": "rank_assets",
+        "seq": 4,
+        "input": {
+          "period": "2026-Q3"
+        },
+        "output": {
+          "furnace": 36.8,
+          "compressors": 15.2,
+          "line_1": 10.3,
+          "line_2": 9.2,
+          "hvac": 8.2
+        },
+        "check": null,
+        "ms": 2.91
+      },
+      {
+        "agent": "writer",
+        "tool": "write_finance_brief",
+        "seq": 5,
+        "input": {
+          "facts": 15,
+          "attempt": 1
+        },
+        "output": {
+          "writer": "llm",
+          "chars": 495
+        },
+        "check": null,
+        "ms": 1513.9
+      },
+      {
+        "agent": "writer",
+        "tool": "verify_numbers",
+        "seq": 6,
+        "input": null,
+        "output": {
+          "numerals": 15,
+          "unmatched": 0,
+          "writer": "llm"
+        },
+        "check": "all numbers match tool outputs",
+        "ms": 0.66
+      }
+    ],
+    "llm_calls": 2,
+    "tokens": 1119,
+    "latency_ms": 2613.07,
+    "registry": [
+      {
+        "key": "asset.compressors.cost",
+        "value": 1301946.272882,
+        "unit": "INR",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:compressors:2026-Q3"
+      },
+      {
+        "key": "asset.compressors.kwh",
+        "value": 210454.9171,
+        "unit": "kWh",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:compressors:2026-Q3"
+      },
+      {
+        "key": "asset.compressors.share",
+        "value": 15.218140641497355,
+        "unit": "share_pct",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:compressors:2026-Q3"
+      },
+      {
+        "key": "asset.furnace.cost",
+        "value": 3443809.3379039997,
+        "unit": "INR",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:furnace:2026-Q3"
+      },
+      {
+        "key": "asset.furnace.kwh",
+        "value": 509192.3418,
+        "unit": "kWh",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:furnace:2026-Q3"
+      },
+      {
+        "key": "asset.furnace.share",
+        "value": 36.820050478572504,
+        "unit": "share_pct",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:furnace:2026-Q3"
+      },
+      {
+        "key": "asset.hvac.cost",
+        "value": 737758.303017,
+        "unit": "INR",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:hvac:2026-Q3"
+      },
+      {
+        "key": "asset.hvac.kwh",
+        "value": 113843.50405,
+        "unit": "kWh",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:hvac:2026-Q3"
+      },
+      {
+        "key": "asset.hvac.share",
+        "value": 8.23210253115903,
+        "unit": "share_pct",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:hvac:2026-Q3"
+      },
+      {
+        "key": "asset.line_1.cost",
+        "value": 964628.677973,
+        "unit": "INR",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:line_1:2026-Q3"
+      },
+      {
+        "key": "asset.line_1.kwh",
+        "value": 143107.0061,
+        "unit": "kWh",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:line_1:2026-Q3"
+      },
+      {
+        "key": "asset.line_1.share",
+        "value": 10.348166607951493,
+        "unit": "share_pct",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:line_1:2026-Q3"
+      },
+      {
+        "key": "asset.line_2.cost",
+        "value": 854512.517204,
+        "unit": "INR",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:line_2:2026-Q3"
+      },
+      {
+        "key": "asset.line_2.kwh",
+        "value": 126813.40305,
+        "unit": "kWh",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:line_2:2026-Q3"
+      },
+      {
+        "key": "asset.line_2.share",
+        "value": 9.169964900011308,
+        "unit": "share_pct",
+        "source_tool": "rank_assets",
+        "evidence_ref": "meter_15min:line_2:2026-Q3"
+      }
+    ]
+  }
+}
