@@ -6,10 +6,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from rng.analysis.assets import asset_totals
 from rng.config import ROOT
+from rng.ingest import pipeline
 from rng.ingest.clean import clean
 from rng.ingest.loader import RawTables, load_csv, load_dir, main_meter
 from rng.ingest.tariff import resolve_prices
+from rng.store import cache
+from rng.store.db import connect, init_schema
 
 DATA = ROOT / "data"
 
@@ -215,3 +219,98 @@ def test_near_zero_working_day_is_a_suspected_holiday():
     tables, report = clean(_raw(_meter(), production))
     assert report.suspected_holidays == ["2026-04-03"]
     assert tables.production["suspected_holiday"].tolist() == [False, False, True, False, False]
+
+
+# --------------------------------------------------------------------------
+# cache, asset_totals, pipeline
+# --------------------------------------------------------------------------
+
+
+def _memory_con():
+    con = connect(":memory:")
+    init_schema(con)
+    return con
+
+
+def test_cache_round_trip_and_replace():
+    con = _memory_con()
+    assert cache.get(con, "d", "bridge", "2026-Q3", "2026-Q2") is None
+    cache.put(con, "d", "bridge", "2026-Q3", {"total_pct": 15.0}, "2026-Q2")
+    cache.put(con, "d", "bridge", "2026-Q3", {"total_pct": 16.0}, "2026-Q2")
+    assert cache.get(con, "d", "bridge", "2026-Q3", "2026-Q2") == {"total_pct": 16.0}
+    # Single-period kinds: None is stored as '' and read back with None.
+    cache.put(con, "d", "asset_totals", "2026-Q3", [{"asset": "x"}])
+    assert cache.get(con, "d", "asset_totals", "2026-Q3") == [{"asset": "x"}]
+    assert con.execute("SELECT compare_to FROM analysis_cache "
+                       "WHERE kind = 'asset_totals'").fetchone() == ("",)
+    assert con.execute("SELECT count(*) FROM analysis_cache").fetchone() == (2,)
+
+
+def test_asset_totals_rank_measured_submeters():
+    meter = _meter(96 * 5)
+    ts = meter["ts"].drop_duplicates()
+    third = pd.DataFrame({"meter_id": "small", "ts": ts, "kwh": 0.5})
+    meter = pd.concat([meter, third], ignore_index=True)
+    tables, _ = clean(_raw(meter))
+    totals = asset_totals(tables, "2026-Q2")
+    assert [a.asset for a in totals] == ["sub", "small"]          # main excluded
+    assert [a.rank for a in totals] == [1, 2]
+    n = len(ts)
+    assert totals[1].kwh == pytest.approx(0.5 * n)
+    assert totals[1].share_pct == pytest.approx(100 * 0.5 / 1.02)
+    assert totals[1].cost == pytest.approx(0.5 * n * 5.0)      # flat 5.0
+    assert asset_totals(tables, "2026-Q4") == []
+
+
+def test_asset_totals_on_primary():
+    tables, _ = clean(load_dir(DATA / "primary"))
+    totals = asset_totals(tables, "2026-Q3")
+    assert len(totals) == tables.meter["meter_id"].nunique() - 1
+    assert all(a.kwh >= b.kwh for a, b in zip(totals, totals[1:], strict=False))
+    assert 80 < sum(a.share_pct for a in totals) < 100
+    assert all(a.cost > 0 for a in totals)
+
+
+def test_precompute_caches_what_works_and_isolates_failures(monkeypatch):
+    def broken(*_args, **_kwargs):
+        raise RuntimeError("bridge exploded")
+
+    monkeypatch.setattr(pipeline, "fit_baseline", lambda clean, period: object())
+    monkeypatch.setattr(pipeline, "decompose", broken)
+    con = _memory_con()
+    result = pipeline.precompute(DATA / "primary", con)
+
+    assert result.periods == ["2026-Q2", "2026-Q3"]
+    assert result.comparisons == [("2026-Q3", "2026-Q2")]
+    assert result.tiers["asset_totals"] == "ok"
+    assert result.tiers["bridge"].startswith("error: RuntimeError")
+    assert cache.get(con, result.dataset_id, "asset_totals", "2026-Q3")
+    assert cache.get(con, result.dataset_id, "cleaning_report", "2026-Q3")["resets_adjusted"] == 1
+    assert cache.get(con, result.dataset_id, "bridge", "2026-Q3", "2026-Q2") is None
+    assert con.execute("SELECT count(*) FROM meter_clean").fetchone()[0] == len(
+        pipeline.current().clean.meter)
+    assert pipeline.current().dataset_id == result.dataset_id
+
+
+def test_precompute_writes_bridge_findings_and_recommendations(monkeypatch):
+    from rng.analysis.decompose import Bridge
+    from rng.api.schemas import Cause
+
+    effects = {c: 10.0 for c in Cause}
+    bridge = Bridge("2026-Q3", "2026-Q2", 1000.0, 1050.0, effects, r2=0.9)
+    monkeypatch.setattr(pipeline, "fit_baseline", lambda clean, period: "model")
+    monkeypatch.setattr(pipeline, "decompose", lambda *a: bridge)
+    monkeypatch.setattr(pipeline, "find_idle_load", lambda clean, period: {})
+    monkeypatch.setattr(pipeline, "detect_leaks", lambda *a: [])
+    monkeypatch.setattr(pipeline, "estimate_savings", lambda f: [])
+    con = _memory_con()
+    result = pipeline.precompute(DATA / "primary", con)
+
+    assert set(result.tiers.values()) == {"ok"}
+    cached = cache.get(con, result.dataset_id, "bridge", "2026-Q3", "2026-Q2")
+    assert cached["total_pct"] == pytest.approx(5.0)
+    assert [i["cause"] for i in cached["items"]] == [c.value for c in Cause]
+    assert cache.get(con, result.dataset_id, "findings", "2026-Q3", "2026-Q2") == []
+    assert cache.get(con, result.dataset_id, "recommendations", "2026-Q3", "2026-Q2") == []
+    clean_tables, model, dataset_id = pipeline.current()
+    assert model == "model" and dataset_id == result.dataset_id
