@@ -181,3 +181,32 @@ def test_the_holdout_is_not_a_rerun_of_the_primary():
     # The primary's mix shift raises energy per unit; the holdout's lowers it.
     assert (holdout["bridge_true"]["mix"]["pp"]
             * primary_truth["bridge_true"]["mix"]["pp"]) < 0
+
+
+def test_a_mid_quarter_price_change_stays_in_the_tariff_effect():
+    """Laying one quarter's tariff on the other's calendar must keep BOTH of
+    its price windows.
+
+    Clamping by date priced the whole reference calendar at the current
+    quarter's first window, which dropped the mid-quarter rise from the tariff
+    effect and handed it to volume (the cause that switches the calendar).
+    """
+    import pandas as pd
+
+    from rng.data.generator import build_calendar, laid_on
+
+    cfg = PROFILES["primary"]
+    ref_cal = build_calendar(cfg["ref"][1], cfg["ref"][2], cfg["ref_holidays"])
+    cur_cal = build_calendar(cfg["cur"][1], cfg["cur"][2], cfg["cur_holidays"])
+
+    # On its own calendar the mapping is the identity.
+    own = laid_on(cur_cal, len(cur_cal))
+    assert list(own[::96].date) == list(cur_cal["date"])
+
+    # On the other quarter's calendar, both current-quarter windows are used.
+    days = laid_on(cur_cal, len(ref_cal))
+    ts = pd.date_range(pd.Timestamp(ref_cal["date"].iloc[0]),
+                       periods=len(ref_cal) * 96, freq="15min")
+    prices = cfg["cur_tariff"].price_array(ts, days)
+    peaks = {w[2] for w in cfg["cur_tariff"].windows}
+    assert peaks <= set(prices.round(4)), "a price window was lost"

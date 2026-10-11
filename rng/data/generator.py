@@ -97,13 +97,16 @@ class Tariff:
     peak_start_hour: int = 9
     peak_end_hour: int = 21
 
-    def price_array(self, ts: pd.DatetimeIndex) -> np.ndarray:
-        day = ts.normalize()
+    def price_array(self, ts: pd.DatetimeIndex,
+                    window_days: pd.DatetimeIndex | None = None) -> np.ndarray:
+        """Price per interval. `window_days` says which day of this tariff's
+        own quarter each interval is priced as; peak hours always follow the
+        interval's real clock time."""
+        day = ts.normalize() if window_days is None else window_days
         peak = np.full(len(ts), self.windows[-1][2], dtype=float)
         off = np.full(len(ts), self.windows[-1][3], dtype=float)
-        # Walk backwards so the earliest window wins for early timestamps and
-        # anything past the final window clamps to the final price. A
-        # counterfactual applies one quarter's prices to the other's calendar.
+        # Walk backwards so the earliest window wins for early days and
+        # anything past the final window takes the final price.
         for _start, end, pk, op in reversed(self.windows):
             m = day <= pd.Timestamp(end)
             peak[m] = pk
@@ -388,13 +391,31 @@ def simulate(d: Drivers, noise: NoiseField, leak: Leak | None):
     return ts, out, production, weather
 
 
-def bill(ts: pd.DatetimeIndex, main_kwh: np.ndarray, tariff: Tariff) -> float:
+def bill(ts: pd.DatetimeIndex, main_kwh: np.ndarray, tariff: Tariff,
+         window_days: pd.DatetimeIndex | None = None) -> float:
     """The bill is the main supply priced interval by interval.
 
     Never a daily total against an average price -- that is the single biggest
     way to get the tariff term wrong.
     """
-    return float(np.dot(main_kwh, tariff.price_array(ts)))
+    return float(np.dot(main_kwh, tariff.price_array(ts, window_days)))
+
+
+def laid_on(own_calendar: pd.DataFrame, n_days: int) -> pd.DatetimeIndex:
+    """A tariff's own quarter laid on a calendar of `n_days`, by position.
+
+    A counterfactual prices one quarter's energy at the other quarter's
+    tariff. Matching by date cannot work -- the dates do not overlap -- and
+    clamping every day to the nearest window prices a whole quarter at one
+    window, which drops a mid-quarter price change from the tariff effect and
+    hands it to whichever cause switches the calendar. So day i of n is priced
+    as the day at the same relative position in the tariff's own quarter, the
+    same rule used to lay one quarter's weather on the other's calendar. On
+    its own calendar this is the identity.
+    """
+    own = pd.DatetimeIndex(pd.to_datetime(list(own_calendar["date"])))
+    position = np.rint(np.linspace(0, len(own) - 1, n_days)).astype(int)
+    return own[np.repeat(position, INTERVALS_PER_DAY)]
 
 
 # --------------------------------------------------------------------------
@@ -538,7 +559,9 @@ def build(cfg: dict, target_rise: float, seed: int):
     def cost_of(active: frozenset) -> float:
         d = blend(ref, cur, active)
         ts, m, _, _ = simulate(d, noise, leak=None)
-        return bill(ts, m["main"], d.tariff)
+        priced_as = cur if "tariff" in active else ref
+        return bill(ts, m["main"], d.tariff,
+                    laid_on(priced_as.calendar, len(d.calendar)))
 
     # C(none) is the reference quarter re-simulated, so it must reproduce the
     # reference bill exactly. If this ever fails the bridge cannot add up.

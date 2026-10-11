@@ -1,0 +1,403 @@
+{
+  "request": {
+    "question": "Why did the electricity bill go up?"
+  },
+  "response": {
+    "run_id": "en-b315de",
+    "answer_type": "decomposition",
+    "summary": "The electricity bill went up to 9,160,290 INR in 2026-Q3 from 7,965,499 INR in 2026-Q2, representing a 15.0 % change. The primary drivers in order of size are tariff (price), product mix, weather, and production volume, which contributed 8.7 percentage points, 3.8 percentage points, 1.2 percentage points, and -0.1 percentage points respectively. An additional factor is waste, contributing 1.4 percentage points of the bill, with a low estimate of 1.0 percentage points and a high estimate of 1.9 percentage points. Further analysis points to compressors, with an estimated waste of 131,052 kWh per year.",
+    "bridge": [
+      {
+        "cause": "tariff",
+        "pct_points": 8.72,
+        "range": [
+          8.7,
+          8.74
+        ],
+        "amount": 694778.08
+      },
+      {
+        "cause": "product_mix",
+        "pct_points": 3.79,
+        "range": [
+          3.23,
+          4.09
+        ],
+        "amount": 301555.52
+      },
+      {
+        "cause": "volume",
+        "pct_points": -0.07,
+        "range": [
+          -0.08,
+          -0.07
+        ],
+        "amount": -5802.98
+      },
+      {
+        "cause": "weather",
+        "pct_points": 1.2,
+        "range": [
+          1.14,
+          1.27
+        ],
+        "amount": 95423.33
+      },
+      {
+        "cause": "waste",
+        "pct_points": 1.37,
+        "range": [
+          1.03,
+          1.87
+        ],
+        "amount": 108837.01
+      }
+    ],
+    "recommendations": [],
+    "assumptions": [
+      "No period was given, so the latest one in the data (2026-Q3) was used.",
+      "No comparison period was given, so the one before it (2026-Q2) was used.",
+      "Emission factor 0.71 kg CO2e per kWh (stated in dataset_meta.json).",
+      "Peak tariff hours taken as 09:00-21:00, weekdays only UTC; Annex B's tariff table names the period but not the hours (stated in dataset_meta.json).",
+      "All clock hours (shifts, peak window, night load) are read in UTC, the time zone of the meter timestamps; no site-local conversion is applied.",
+      "Recovery fraction 60%-85% of identified waste is actually recoverable (our assumption, not in the data).",
+      "Fix costs are our estimates and are not present in any input file; payback ranges inherit their uncertainty.",
+      "Sub-meter totals are reconciled to the main meter within 6.0%.",
+      "All money in INR."
+    ],
+    "limitations": [
+      "Baseline (R-squared 1.00) is fitted on 2026-Q2 only and is linear in degree-days; a non-linear weather response lands in the waste residual.",
+      "Waste is the unexplained residual, not a separate measurement.",
+      "144 missing meter intervals were imputed.",
+      "1 meter reset(s) were corrected.",
+      "Days logged as normal shifts but with near-zero production were treated as holidays: 2026-09-07."
+    ],
+    "total_pct_points": 14.999575209253662
+  },
+  "trace": {
+    "run_id": "en-b315de",
+    "question": "Why did the electricity bill go up?",
+    "answer_type": "decomposition",
+    "steps": [
+      {
+        "agent": "classifier",
+        "tool": "classify_request",
+        "seq": 1,
+        "input": {
+          "question": "Why did the electricity bill go up?"
+        },
+        "output": {
+          "intent": "bridge",
+          "source": "gemini:gemini-3.5-flash-lite"
+        },
+        "check": null,
+        "ms": 3446.7
+      },
+      {
+        "agent": "analyst",
+        "tool": "guard",
+        "seq": 2,
+        "input": {
+          "intent": "bridge"
+        },
+        "output": {
+          "period": "2026-Q3",
+          "compare_to": "2026-Q2",
+          "in_scope": true
+        },
+        "check": null,
+        "ms": 0.01
+      },
+      {
+        "agent": "analyst",
+        "tool": "load_analysis",
+        "seq": 3,
+        "input": {
+          "period": "2026-Q3",
+          "compare_to": "2026-Q2"
+        },
+        "output": {
+          "dataset_id": "primary-s7-r150",
+          "served_from": "analysis_cache"
+        },
+        "check": null,
+        "ms": 1.12
+      },
+      {
+        "agent": "analyst",
+        "tool": "build_baseline",
+        "seq": 4,
+        "input": {
+          "fitted_on": "2026-Q2"
+        },
+        "output": {
+          "r2": 1.0
+        },
+        "check": null,
+        "ms": 3.99
+      },
+      {
+        "agent": "analyst",
+        "tool": "decompose_change",
+        "seq": 5,
+        "input": {
+          "period": "2026-Q3",
+          "compare_to": "2026-Q2"
+        },
+        "output": {
+          "tariff": 8.72,
+          "product_mix": 3.79,
+          "volume": -0.07,
+          "weather": 1.2,
+          "waste": 1.37,
+          "total": 15.0
+        },
+        "check": null,
+        "ms": 3.99
+      },
+      {
+        "agent": "analyst",
+        "tool": "detect_leaks",
+        "seq": 6,
+        "input": {
+          "requires": "bridge"
+        },
+        "output": {
+          "findings": 1,
+          "asset": "compressors"
+        },
+        "check": null,
+        "ms": 3.99
+      },
+      {
+        "agent": "writer",
+        "tool": "write_finance_brief",
+        "seq": 7,
+        "input": {
+          "facts": 28,
+          "attempt": 1
+        },
+        "output": {
+          "writer": "llm",
+          "chars": 606
+        },
+        "check": null,
+        "ms": 1230.12
+      },
+      {
+        "agent": "writer",
+        "tool": "verify_numbers",
+        "seq": 8,
+        "input": null,
+        "output": {
+          "numerals": 11,
+          "unmatched": 0,
+          "writer": "llm"
+        },
+        "check": "all numbers match tool outputs",
+        "ms": 0.2
+      }
+    ],
+    "llm_calls": 2,
+    "tokens": 1255,
+    "latency_ms": 4687.52,
+    "registry": [
+      {
+        "key": "baseline.r2",
+        "value": 0.9995605850833735,
+        "unit": "r2",
+        "source_tool": "build_baseline",
+        "evidence_ref": "baseline:2026-Q2"
+      },
+      {
+        "key": "bill.change_pct",
+        "value": 14.999575209253662,
+        "unit": "%",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:2026-Q3:vs:2026-Q2"
+      },
+      {
+        "key": "bill.current",
+        "value": 9160289.633011002,
+        "unit": "INR",
+        "source_tool": "decompose_change",
+        "evidence_ref": "meter_15min:main:2026-Q3"
+      },
+      {
+        "key": "bill.reference",
+        "value": 7965498.669314999,
+        "unit": "INR",
+        "source_tool": "decompose_change",
+        "evidence_ref": "meter_15min:main:2026-Q2"
+      },
+      {
+        "key": "bridge.product_mix.amount",
+        "value": 301555.52,
+        "unit": "INR",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:product_mix:2026-Q3"
+      },
+      {
+        "key": "bridge.product_mix.high",
+        "value": 4.09,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:product_mix:2026-Q3"
+      },
+      {
+        "key": "bridge.product_mix.low",
+        "value": 3.23,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:product_mix:2026-Q3"
+      },
+      {
+        "key": "bridge.product_mix.pp",
+        "value": 3.79,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:product_mix:2026-Q3"
+      },
+      {
+        "key": "bridge.tariff.amount",
+        "value": 694778.08,
+        "unit": "INR",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:tariff:2026-Q3"
+      },
+      {
+        "key": "bridge.tariff.high",
+        "value": 8.74,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:tariff:2026-Q3"
+      },
+      {
+        "key": "bridge.tariff.low",
+        "value": 8.7,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:tariff:2026-Q3"
+      },
+      {
+        "key": "bridge.tariff.pp",
+        "value": 8.72,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:tariff:2026-Q3"
+      },
+      {
+        "key": "bridge.volume.amount",
+        "value": -5802.98,
+        "unit": "INR",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:volume:2026-Q3"
+      },
+      {
+        "key": "bridge.volume.high",
+        "value": -0.07,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:volume:2026-Q3"
+      },
+      {
+        "key": "bridge.volume.low",
+        "value": -0.08,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:volume:2026-Q3"
+      },
+      {
+        "key": "bridge.volume.pp",
+        "value": -0.07,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:volume:2026-Q3"
+      },
+      {
+        "key": "bridge.waste.amount",
+        "value": 108837.01,
+        "unit": "INR",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:waste:2026-Q3"
+      },
+      {
+        "key": "bridge.waste.high",
+        "value": 1.87,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:waste:2026-Q3"
+      },
+      {
+        "key": "bridge.waste.low",
+        "value": 1.03,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:waste:2026-Q3"
+      },
+      {
+        "key": "bridge.waste.pp",
+        "value": 1.37,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:waste:2026-Q3"
+      },
+      {
+        "key": "bridge.weather.amount",
+        "value": 95423.33,
+        "unit": "INR",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:weather:2026-Q3"
+      },
+      {
+        "key": "bridge.weather.high",
+        "value": 1.27,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:weather:2026-Q3"
+      },
+      {
+        "key": "bridge.weather.low",
+        "value": 1.14,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:weather:2026-Q3"
+      },
+      {
+        "key": "bridge.weather.pp",
+        "value": 1.2,
+        "unit": "pp",
+        "source_tool": "decompose_change",
+        "evidence_ref": "bridge:weather:2026-Q3"
+      },
+      {
+        "key": "finding.0.kwh_per_year",
+        "value": 131052.4,
+        "unit": "kWh",
+        "source_tool": "detect_leaks",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "finding.0.quoted.0",
+        "value": 15.0,
+        "unit": "quoted",
+        "source_tool": "detect_leaks",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "finding.0.quoted.1",
+        "value": 100.0,
+        "unit": "quoted",
+        "source_tool": "detect_leaks",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      },
+      {
+        "key": "finding.0.quoted.2",
+        "value": 37.0,
+        "unit": "quoted",
+        "source_tool": "detect_leaks",
+        "evidence_ref": "idle_floor:compressors:2026-Q2..2026-Q3"
+      }
+    ]
+  }
+}

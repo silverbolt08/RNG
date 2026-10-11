@@ -9,20 +9,20 @@
   },
   "bridge_true": {
     "tariff": {
-      "cost": 574708.84,
-      "pp": 6.0223
+      "cost": 638291.96,
+      "pp": 6.6885
     },
     "volume": {
-      "cost": 1681119.9,
-      "pp": 17.6162
+      "cost": 1619026.11,
+      "pp": 16.9655
     },
     "mix": {
-      "cost": -555541.25,
-      "pp": -5.8214
+      "cost": -556616.08,
+      "pp": -5.8327
     },
     "weather": {
-      "cost": 166119.4,
-      "pp": 1.7407
+      "cost": 165704.92,
+      "pp": 1.7364
     },
     "waste": {
       "cost": 233085.35,
@@ -31,19 +31,19 @@
   },
   "counterfactuals": {
     "none": 9543058.19,
-    "tariff": 10015972.04,
+    "tariff": 10146116.89,
     "volume": 11169541.73,
     "mix": 9062080.0,
     "weather": 9702892.08,
     "tariff,volume": 11872454.06,
-    "mix,tariff": 9511270.82,
-    "tariff,weather": 10183699.6,
+    "mix,tariff": 9634966.71,
+    "tariff,weather": 10311357.53,
     "mix,volume": 10572233.52,
     "volume,weather": 11335559.02,
     "mix,weather": 9221913.89,
     "mix,tariff,volume": 11237813.19,
     "tariff,volume,weather": 12044105.95,
-    "mix,tariff,weather": 9678998.38,
+    "mix,tariff,weather": 9800207.35,
     "mix,volume,weather": 10738250.81,
     "mix,tariff,volume,weather": 11409465.08
   },
@@ -123,6 +123,6 @@
   "profile": "holdout",
   "seed": 4201,
   "target_rise_pct": 22.0,
-  "generated_at": "2026-10-11T08:48:45+00:00",
+  "generated_at": "2026-10-11T09:53:55+00:00",
   "generator": "rng/data/generator.py"
 }
