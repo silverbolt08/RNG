@@ -253,6 +253,11 @@ def savings(store: Store, state: dict) -> dict[str, Any]:
         return {"missing": "no decomposition exists yet, and actions are only "
                            "recommended after tariff, volume, mix and weather "
                            "have been removed"}
+    # "Not computed" is not "nothing to do". An empty list means the analysis
+    # ran and found no waste; a missing one means it never ran.
+    if store.cached("recommendations", period, compare_to) is None:
+        return {"missing": "savings have not been estimated for this period, "
+                           "so no action can be costed or ranked"}
     reg = Registry()
     reg.name(*state.get("assets", []))
     recs = _recommendations(store, reg, period, compare_to)
@@ -322,10 +327,10 @@ def what_if(store: Store, state: dict) -> dict[str, Any]:
         from rng.ingest.pipeline import current
 
         live = current()
-        result = what_if_tariff(live.clean, period, compare_to, live.model, scale)
+        scenario = what_if_tariff(live.clean, period, compare_to, live.model,
+                                  scale).scenario
     except Exception as exc:   # engine not available: say so, never guess
         return {"missing": f"the what-if engine is not available ({type(exc).__name__})"}
-    scenario = result[1] if isinstance(result, tuple) else result["scenario"]
     s = {"current_cost": scenario.current_cost,
          "reference_cost": scenario.reference_cost, "total_pct": scenario.total_pct,
          "items": [i.model_dump(mode="json") for i in scenario.to_items()]}
