@@ -23,7 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
 from itertools import combinations
 from math import factorial
@@ -119,7 +119,7 @@ class Tariff:
             for period, price in (("peak", pk), ("off_peak", op)):
                 rows.append({
                     "valid_from": f"{start.isoformat()}T00:00:00Z",
-                    "valid_to": f"{end.isoformat()}T23:59:59Z",
+                    "valid_to": f"{(end + timedelta(days=1)).isoformat()}T00:00:00Z",
                     "period": period,
                     "price_per_kwh": round(price, 5),
                     "peak_start_hour": self.peak_start_hour,
@@ -445,11 +445,11 @@ PROFILES = {
                                "logged_pattern": "2-shift",
                                "logged_holiday": False},
         },
-        "ref_tariff": Tariff(((date(2026, 4, 1), date(2026, 6, 30), 0.172, 0.096),)),
+        "ref_tariff": Tariff(((date(2026, 4, 1), date(2026, 6, 30), 7.22, 4.03),)),
         "cur_tariff": Tariff((
-            (date(2026, 7, 1), date(2026, 8, 15), 0.182, 0.102),
+            (date(2026, 7, 1), date(2026, 8, 15), 7.64, 4.28),
             # Edge case: the price changes in the middle of the quarter.
-            (date(2026, 8, 16), date(2026, 9, 30), 0.191, 0.107),
+            (date(2026, 8, 16), date(2026, 9, 30), 8.02, 4.49),
         )),
         "warm_shift": 0.3,
         "excursion": (date(2026, 8, 5), date(2026, 8, 13), 3.5),
@@ -476,10 +476,10 @@ PROFILES = {
                                "logged_pattern": "3-shift",
                                "logged_holiday": False},
         },
-        "ref_tariff": Tariff(((date(2026, 4, 1), date(2026, 6, 30), 0.151, 0.112),)),
+        "ref_tariff": Tariff(((date(2026, 4, 1), date(2026, 6, 30), 6.34, 4.70),)),
         "cur_tariff": Tariff((
-            (date(2026, 7, 1), date(2026, 9, 2), 0.158, 0.118),
-            (date(2026, 9, 3), date(2026, 9, 30), 0.164, 0.124),
+            (date(2026, 7, 1), date(2026, 9, 2), 6.64, 4.96),
+            (date(2026, 9, 3), date(2026, 9, 30), 6.89, 5.21),
         )),
         "warm_shift": 2.3,
         "excursion": (date(2026, 7, 20), date(2026, 7, 29), 5.2),
@@ -695,6 +695,8 @@ def main() -> None:
         "peak_start_hour": cfg["cur_tariff"].peak_start_hour,
         "peak_end_hour": cfg["cur_tariff"].peak_end_hour,
         "peak_applies_on_weekends": False,
+        "tariff_window_convention": (
+            "[valid_from, valid_to) -- valid_to is exclusive"),
         "submeter_reconciliation_tolerance_pct": 6.0,
         "note": ("Values the analyser is allowed to read. "
                  "ground_truth.json is not."),

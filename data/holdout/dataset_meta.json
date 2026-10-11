@@ -5,6 +5,7 @@
   "peak_start_hour": 9,
   "peak_end_hour": 21,
   "peak_applies_on_weekends": false,
+  "tariff_window_convention": "[valid_from, valid_to) -- valid_to is exclusive",
   "submeter_reconciliation_tolerance_pct": 6.0,
   "note": "Values the analyser is allowed to read. ground_truth.json is not."
 }

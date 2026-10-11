@@ -2,54 +2,54 @@
   "reference_period": "2026-Q2",
   "current_period": "2026-Q3",
   "actual": {
-    "reference_cost": 189757.24,
-    "current_cost": 218220.99,
-    "total_change": 28463.75,
-    "rise_pct": 15.0001
+    "reference_cost": 7965498.67,
+    "current_cost": 9160289.64,
+    "total_change": 1194790.97,
+    "rise_pct": 14.9996
   },
   "bridge_true": {
     "tariff": {
-      "cost": 14003.2,
-      "pp": 7.3795
+      "cost": 587624.77,
+      "pp": 7.3771
     },
     "volume": {
-      "cost": 3075.19,
-      "pp": 1.6206
+      "cost": 129448.97,
+      "pp": 1.6251
     },
     "mix": {
-      "cost": 5435.95,
-      "pp": 2.8647
+      "cost": 227988.64,
+      "pp": 2.8622
     },
     "weather": {
-      "cost": 3056.92,
-      "pp": 1.611
+      "cost": 128316.71,
+      "pp": 1.6109
     },
     "waste": {
-      "cost": 2892.5,
-      "pp": 1.5243
+      "cost": 121411.88,
+      "pp": 1.5242
     }
   },
   "counterfactuals": {
-    "none": 189757.24,
-    "tariff": 200982.96,
-    "volume": 190244.93,
-    "mix": 195011.53,
-    "weather": 192671.52,
-    "tariff,volume": 206477.71,
-    "mix,tariff": 206547.3,
-    "tariff,weather": 204067.86,
-    "mix,volume": 195464.29,
-    "volume,weather": 193294.85,
-    "mix,weather": 197925.8,
-    "mix,tariff,volume": 212139.41,
-    "tariff,volume,weather": 209666.79,
-    "mix,tariff,weather": 209632.2,
-    "mix,volume,weather": 198514.21,
-    "mix,tariff,volume,weather": 215328.5
+    "none": 7965498.67,
+    "tariff": 8436054.96,
+    "volume": 7986037.41,
+    "mix": 8186058.9,
+    "weather": 8087831.06,
+    "tariff,volume": 8667750.08,
+    "mix,tariff": 8669615.93,
+    "tariff,weather": 8565548.0,
+    "mix,volume": 8204748.4,
+    "volume,weather": 8114063.94,
+    "mix,weather": 8308391.29,
+    "mix,tariff,volume": 8905019.8,
+    "tariff,volume,weather": 8801608.04,
+    "mix,tariff,weather": 8799108.96,
+    "mix,volume,weather": 8332774.93,
+    "mix,tariff,volume,weather": 9038877.76
   },
   "drivers": {
     "reference_total_units": 200000,
-    "current_total_units": 199031,
+    "current_total_units": 199013,
     "reference_mix": {
       "widget_a": 0.5,
       "widget_b": 0.38,
@@ -129,6 +129,6 @@
   "profile": "primary",
   "seed": 7,
   "target_rise_pct": 15.0,
-  "generated_at": "2026-10-11T08:07:51+00:00",
+  "generated_at": "2026-10-11T08:12:32+00:00",
   "generator": "rng/data/generator.py"
 }

@@ -83,20 +83,27 @@ def test_tables_carry_the_annex_b_columns(primary):
 
 
 def test_tariff_windows_are_contiguous_and_do_not_overlap(primary):
+    """Windows are half-open [valid_from, valid_to).
+
+    An inclusive 23:59:59 end leaves a one-second hole between windows, which a
+    strict "tariff periods cover the whole period" check (Section 4.5) fails.
+    Under half-open semantics one window's end IS the next one's start, so
+    contiguity and non-overlap are the same assertion.
+    """
     frames, _, _ = primary
     tf = frames["tariff"]
     for period in ("peak", "off_peak"):
         rows = tf[tf["period"] == period].sort_values("valid_from")
         ends = list(rows["valid_to"])[:-1]
         starts = list(rows["valid_from"])[1:]
-        for end, nxt in zip(ends, starts):
-            assert end[:10] < nxt[:10], f"{period}: {end} then {nxt}"
-            assert nxt[:10] <= _next_day(end[:10]), f"gap between {end} and {nxt}"
+        assert ends == starts, f"{period}: {ends} vs {starts}"
 
 
-def _next_day(iso: str) -> str:
-    from datetime import date, timedelta
-    return (date.fromisoformat(iso) + timedelta(days=1)).isoformat()
+def test_tariff_covers_every_metered_interval(primary):
+    frames, _, _ = primary
+    tf, meter = frames["tariff"], frames["meter_15min"]
+    assert tf["valid_from"].min() <= meter["ts"].min()
+    assert tf["valid_to"].max() > meter["ts"].max()
 
 
 def test_meets_the_section_4_3_minimums(primary):

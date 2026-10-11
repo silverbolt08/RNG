@@ -2,54 +2,54 @@
   "reference_period": "2026-Q2",
   "current_period": "2026-Q3",
   "actual": {
-    "reference_cost": 227321.38,
-    "current_cost": 277331.7,
-    "total_change": 50010.32,
-    "rise_pct": 21.9998
+    "reference_cost": 9543058.19,
+    "current_cost": 11642550.43,
+    "total_change": 2099492.24,
+    "rise_pct": 22.0002
   },
   "bridge_true": {
     "tariff": {
-      "cost": 13425.9,
-      "pp": 5.9061
+      "cost": 574708.84,
+      "pp": 6.0223
     },
     "volume": {
-      "cost": 40329.09,
-      "pp": 17.741
+      "cost": 1681119.9,
+      "pp": 17.6162
     },
     "mix": {
-      "cost": -13245.65,
-      "pp": -5.8268
+      "cost": -555541.25,
+      "pp": -5.8214
     },
     "weather": {
-      "cost": 3954.59,
-      "pp": 1.7396
+      "cost": 166119.4,
+      "pp": 1.7407
     },
     "waste": {
-      "cost": 5546.39,
-      "pp": 2.4399
+      "cost": 233085.35,
+      "pp": 2.4425
     }
   },
   "counterfactuals": {
-    "none": 227321.38,
-    "tariff": 238318.18,
-    "volume": 266367.95,
-    "mix": 215864.37,
-    "weather": 231128.67,
-    "tariff,volume": 282844.24,
-    "mix,tariff": 226309.34,
-    "tariff,weather": 242309.08,
-    "mix,volume": 252102.24,
-    "volume,weather": 270322.55,
-    "mix,weather": 219671.66,
-    "mix,tariff,volume": 267701.58,
-    "tariff,volume,weather": 286927.97,
-    "mix,tariff,weather": 230300.24,
-    "mix,volume,weather": 256056.85,
-    "mix,tariff,volume,weather": 271785.31
+    "none": 9543058.19,
+    "tariff": 10015972.04,
+    "volume": 11169541.73,
+    "mix": 9062080.0,
+    "weather": 9702892.08,
+    "tariff,volume": 11872454.06,
+    "mix,tariff": 9511270.82,
+    "tariff,weather": 10183699.6,
+    "mix,volume": 10572233.52,
+    "volume,weather": 11335559.02,
+    "mix,weather": 9221913.89,
+    "mix,tariff,volume": 11237813.19,
+    "tariff,volume,weather": 12044105.95,
+    "mix,tariff,weather": 9678998.38,
+    "mix,volume,weather": 10738250.81,
+    "mix,tariff,volume,weather": 11409465.08
   },
   "drivers": {
     "reference_total_units": 236000,
-    "current_total_units": 293569,
+    "current_total_units": 293130,
     "reference_mix": {
       "widget_a": 0.33,
       "widget_b": 0.4,
@@ -123,6 +123,6 @@
   "profile": "holdout",
   "seed": 4201,
   "target_rise_pct": 22.0,
-  "generated_at": "2026-10-11T08:07:52+00:00",
+  "generated_at": "2026-10-11T08:12:33+00:00",
   "generator": "rng/data/generator.py"
 }
