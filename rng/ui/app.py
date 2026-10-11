@@ -254,13 +254,18 @@ def main() -> None:
     show_health()
 
     st.session_state.setdefault("question", EXAMPLES[0])
-    st.write("Try one:")
+    st.write("**Ask anything about the bill.** Type your own question in the "
+             "box below, or click an example to fill it in. Nothing is "
+             "pre-written: every answer is computed when you press Ask.")
     for column, example in zip(st.columns(len(EXAMPLES)), EXAMPLES, strict=True):
-        if column.button(example, width="stretch"):
+        if column.button(example, width="stretch", help="Fills the box below"):
             st.session_state["question"] = example
 
     with st.form("ask"):
-        question = st.text_area("Question", key="question", height=80)
+        question = st.text_area(
+            "Your question (edit or replace this text, then press Ask or Ctrl+Enter)",
+            key="question", height=80,
+            placeholder="For example: How much did the furnace cost us last quarter?")
         left, right = st.columns(2)
         period = left.text_input("Period (optional)", placeholder="YYYY-Qn")
         compare_to = right.text_input("Compare to (optional)", placeholder="YYYY-Qn")
