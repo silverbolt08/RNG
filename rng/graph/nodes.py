@@ -23,7 +23,7 @@ from rng.graph.store_io import Store
 from rng.periods import period_bounds
 
 ANSWER_TYPE = {"bridge": "decomposition", "bill_total": "calculated",
-               "top_users": "calculated", "idle_load": "calculated",
+               "top_users": "calculated", "asset_change": "calculated", "idle_load": "calculated",
                "what_if": "calculated", "savings": "recommendation",
                "ranking": "recommendation"}
 MAX_LLM_DRAFTS = 2          # one draft, one regeneration, then the template

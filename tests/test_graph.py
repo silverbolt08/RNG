@@ -247,3 +247,22 @@ def test_asking_for_the_least_is_not_answered_with_the_most(engine):
     assert most.summary.index("kiln") < most.summary.index("line_1")
     lowest = ask(engine, "Which machine has the lowest consumption?")
     assert "smallest" in lowest.summary
+
+
+def test_which_machine_had_the_largest_cost_increase_is_its_own_question(engine):
+    """Typed into the page, this fell through to the bill decomposition."""
+    engine.store._con.execute(
+        "INSERT INTO analysis_cache VALUES ('fixture', 'asset_totals', ?, '', ?, now())",
+        [R, json.dumps([
+            {"asset": "kiln", "kwh": 480000.0, "share_pct": 40.0, "cost": 3000000.0, "rank": 1},
+            {"asset": "press_7", "kwh": 150000.0, "share_pct": 12.0, "cost": 900000.0, "rank": 2},
+            {"asset": "line_1", "kwh": 149000.0, "share_pct": 12.0, "cost": 950000.0, "rank": 3}])])
+    q = ("Find me the machine with the data comparison for the last 2 quarters "
+         "which is having a maximum cost increase")
+    assert route_keywords(q, ["main", "kiln", "press_7", "line_1"]).intent == "asset_change"
+    r = ask(engine, q)
+    assert r.answer_type.value == "calculated" and not r.bridge
+    assert r.summary.index("press_7") < r.summary.index("kiln")   # +500,000 vs +300,000
+    assert "500,000" in r.summary
+    # a question about causes is still a question about causes
+    assert route_keywords("Which machine caused the increase?", []).intent == "bridge"

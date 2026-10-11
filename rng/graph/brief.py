@@ -154,7 +154,37 @@ def _what_if(reg: Registry, st: dict) -> str:
             f"{reg.show('base.bridge.tariff.pp')}; energy use is unchanged.")
 
 
-_TEMPLATES = {"bridge": _bridge, "bill_total": _bill_total, "top_users": _top_users,
+def _change_line(reg: Registry, asset: str, ccy: str) -> str:
+    rose = reg.value(f"change.{asset}.d_cost") >= 0
+    return (f"{asset} ({'up' if rose else 'down'} "
+            f"{reg.show(f'change.{asset}.d_cost', True)} {ccy})")
+
+
+def _asset_change(reg: Registry, st: dict) -> str:
+    f, period, ref = st["facts"], st["period"], st["compare_to"]
+    ccy, order = f["ccy"], f["order"]
+    top = order[0]
+    rose = reg.value(f"change.{top}.d_cost") >= 0
+    out = [f"Comparing {period} with {ref}, the machine with the "
+           f"{f.get('direction', 'largest')} change in cost is {top}: its cost "
+           f"went from {reg.show(f'change.{top}.cost_then')} {ccy} to "
+           f"{reg.show(f'change.{top}.cost_now')} {ccy}, "
+           f"{'an increase' if rose else 'a decrease'} of "
+           f"{reg.show(f'change.{top}.d_cost', True)} {ccy}"]
+    if f"change.{top}.d_cost_pct" in reg:
+        out[0] += f" ({reg.show(f'change.{top}.d_cost_pct', True)}%)"
+    out[0] += (f". Its energy use went from {reg.show(f'change.{top}.kwh_then')} "
+               f"kWh to {reg.show(f'change.{top}.kwh_now')} kWh.")
+    if len(order) > 1:
+        out.append("Next are "
+                   + _join([_change_line(reg, a, ccy) for a in order[1:]]) + ".")
+    out.append("These are measured figures and include the price rise, so a "
+               "higher cost alone does not mean the machine is at fault; the "
+               "bill decomposition separates the causes.")
+    return " ".join(out)
+
+
+_TEMPLATES = {"asset_change": _asset_change, "bridge": _bridge, "bill_total": _bill_total, "top_users": _top_users,
               "idle_load": _idle_load, "savings": _savings, "ranking": _savings,
               "what_if": _what_if}
 

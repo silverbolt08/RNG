@@ -21,7 +21,8 @@ CAUSE_LABEL = {
     "tariff": "tariff (price)", "product_mix": "product mix",
     "volume": "production volume", "weather": "weather", "waste": "waste",
 }
-PAIR_KINDS = {"bridge", "bill_total", "savings", "ranking", "what_if"}
+PAIR_KINDS = {"bridge", "bill_total", "savings", "ranking", "what_if",
+              "asset_change"}
 TOP_N = 5
 
 
@@ -361,6 +362,63 @@ def what_if(store: Store, state: dict) -> dict[str, Any]:
                         "total": round(scenario.total_pct, 2)})]}
 
 
-HANDLERS = {"bridge": bridge, "bill_total": bill_total, "top_users": top_users,
+def asset_change(store: Store, state: dict) -> dict[str, Any]:
+    """Each asset's measured cost and energy in two periods, ranked by the
+    change in cost. Two cached lookups and a subtraction; no model."""
+    period, compare_to = state["period"], state["compare_to"]
+    now = {r["asset"]: r for r in store.cached("asset_totals", period) or []}
+    then = {r["asset"]: r for r in store.cached("asset_totals", compare_to) or []}
+    common = [a for a in now if a in then]
+    if not common:
+        return {"missing": f"asset totals are not available for both {period} "
+                           f"and {compare_to}"}
+    least = (state.get("intent") or {}).get("order") == "asc"
+    rows = sorted(({"asset": a,
+                    "cost_now": now[a]["cost"], "cost_then": then[a]["cost"],
+                    "kwh_now": now[a]["kwh"], "kwh_then": then[a]["kwh"],
+                    "d_cost": now[a]["cost"] - then[a]["cost"],
+                    "d_kwh": now[a]["kwh"] - then[a]["kwh"]} for a in common),
+                  key=lambda r: r["d_cost"], reverse=not least)
+    asked = (state.get("intent") or {}).get("asset")
+    shown = rows[:TOP_N]
+    if asked and asked not in [r["asset"] for r in shown]:
+        shown += [r for r in rows if r["asset"] == asked]
+    reg = Registry()
+    reg.name(*common)
+    ccy = assumptions().currency
+    for r in shown:
+        a, ev = r["asset"], f"meter_15min:{r['asset']}:{compare_to}..{period}"
+        reg.put(f"change.{a}.cost_now", r["cost_now"], ccy, src="compare_assets",
+                ev=ev, label=f"Cost of {a} in {period} ({ccy})")
+        reg.put(f"change.{a}.cost_then", r["cost_then"], ccy, src="compare_assets",
+                ev=ev, label=f"Cost of {a} in {compare_to} ({ccy})")
+        reg.put(f"change.{a}.d_cost", r["d_cost"], ccy, src="compare_assets", ev=ev,
+                label=f"Change in the cost of {a}, {compare_to} to {period} ({ccy})")
+        if r["cost_then"]:
+            reg.put(f"change.{a}.d_cost_pct", 100.0 * r["d_cost"] / r["cost_then"],
+                    "%", src="compare_assets", ev=ev,
+                    label=f"Change in the cost of {a}, percent")
+        reg.put(f"change.{a}.kwh_now", r["kwh_now"], "kWh", src="compare_assets",
+                ev=ev, label=f"Energy used by {a} in {period}")
+        reg.put(f"change.{a}.kwh_then", r["kwh_then"], "kWh", src="compare_assets",
+                ev=ev, label=f"Energy used by {a} in {compare_to}")
+        reg.put(f"change.{a}.d_kwh", r["d_kwh"], "kWh", src="compare_assets", ev=ev,
+                label=f"Change in the energy used by {a}")
+    return {"registry": reg,
+            "notes": ["Assets are listed by change in cost, "
+                      + ("smallest first." if least else "largest first."),
+                      "A cost change includes the price change. It is a measured "
+                      "fact, not evidence of a fault: do not blame the machine."],
+            "facts": {"order": [r["asset"] for r in shown[:3]], "ccy": ccy,
+                      "direction": "smallest" if least else "largest"},
+            "limitations": _limitations(store, period, [
+                "A rise in an asset's cost includes the tariff change and any "
+                "change in production or weather; it does not by itself show "
+                "waste. See the bill decomposition for the causes."]),
+            "trace": [("compare_assets", {"period": period, "compare_to": compare_to},
+                       {r["asset"]: round(r["d_cost"], 2) for r in shown})]}
+
+
+HANDLERS = {"asset_change": asset_change, "bridge": bridge, "bill_total": bill_total, "top_users": top_users,
             "idle_load": idle_load, "savings": savings, "ranking": savings,
             "what_if": what_if}

@@ -20,7 +20,7 @@ from rng.config import Settings
 
 log = logging.getLogger(__name__)
 
-INTENTS = ("bridge", "bill_total", "top_users", "idle_load", "savings",
+INTENTS = ("bridge", "bill_total", "top_users", "asset_change", "idle_load", "savings",
            "ranking", "what_if", "out_of_scope", "refuse", "unclear")
 
 _PERIOD = re.compile(r"\b(20\d{2})[-\s]?Q([1-4])\b", re.IGNORECASE)
@@ -136,6 +136,18 @@ def route_keywords(question: str, assets: list[str]) -> Intent:
     elif _has(q, "what should we do", "recommend", "saving", "save ", "action",
               "do first", "reduce the bill", "cut the bill", "fix"):
         out.intent = "savings"
+    # Asking what caused or who is to blame is a question about causes, even
+    # when it names a machine: causes are separated before anything is blamed.
+    elif _has(q, "caused", "to blame", "responsible for", "at fault") or _has(q, "caused", "to blame", "responsible for", "at fault"):
+        out.intent = "bridge"
+    # Which asset's cost or energy moved the most between two periods.
+    elif (_has(q, "asset", "machine", "meter", "equipment")
+          and (_has(q, "compar")
+               or (_has(q, "increase", "rise", "rose", "grew", "growth", "change",
+                        "jump", "went up", "decrease", "drop", "fell")
+                   and _has(q, "most", "max", "biggest", "largest", "highest",
+                            "least", "smallest", "each", "every")))):
+        out.intent = "asset_change"
     # A ranking word alone is not a question about assets: "the biggest driver
     # of the increase" asks about causes. It needs something to rank.
     elif (_has(q, "most energy", "top user", "which asset", "which machine",
@@ -180,6 +192,7 @@ Intents:
   bridge        why the bill changed; split into tariff, volume, mix, weather, waste
   bill_total    how much the bill was
   top_users     which assets use the most energy
+  asset_change  which asset's cost or energy changed the most between two periods
   idle_load     energy used when nothing is produced
   savings       what to do, which actions save money
   ranking       which action pays back fastest
