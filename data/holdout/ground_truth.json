@@ -1,0 +1,128 @@
+{
+  "reference_period": "2026-Q2",
+  "current_period": "2026-Q3",
+  "actual": {
+    "reference_cost": 227321.38,
+    "current_cost": 277331.7,
+    "total_change": 50010.32,
+    "rise_pct": 21.9998
+  },
+  "bridge_true": {
+    "tariff": {
+      "cost": 13425.9,
+      "pp": 5.9061
+    },
+    "volume": {
+      "cost": 40329.09,
+      "pp": 17.741
+    },
+    "mix": {
+      "cost": -13245.65,
+      "pp": -5.8268
+    },
+    "weather": {
+      "cost": 3954.59,
+      "pp": 1.7396
+    },
+    "waste": {
+      "cost": 5546.39,
+      "pp": 2.4399
+    }
+  },
+  "counterfactuals": {
+    "none": 227321.38,
+    "tariff": 238318.18,
+    "volume": 266367.95,
+    "mix": 215864.37,
+    "weather": 231128.67,
+    "tariff,volume": 282844.24,
+    "mix,tariff": 226309.34,
+    "tariff,weather": 242309.08,
+    "mix,volume": 252102.24,
+    "volume,weather": 270322.55,
+    "mix,weather": 219671.66,
+    "mix,tariff,volume": 267701.58,
+    "tariff,volume,weather": 286927.97,
+    "mix,tariff,weather": 230300.24,
+    "mix,volume,weather": 256056.85,
+    "mix,tariff,volume,weather": 271785.31
+  },
+  "drivers": {
+    "reference_total_units": 236000,
+    "current_total_units": 293569,
+    "reference_mix": {
+      "widget_a": 0.33,
+      "widget_b": 0.4,
+      "alloy_core": 0.27
+    },
+    "current_mix": {
+      "widget_a": 0.41,
+      "widget_b": 0.38,
+      "alloy_core": 0.21
+    },
+    "product_intensity_kwh_per_unit": {
+      "widget_a": 1.0,
+      "widget_b": 2.3,
+      "alloy_core": 6.4
+    },
+    "reference_mean_temp_c": 21.59,
+    "current_mean_temp_c": 25.71
+  },
+  "anomalies": {
+    "leak": {
+      "meter_id": "chillers",
+      "start": "2026-07-11",
+      "kw": 21.0,
+      "kwh_total": 40824.0
+    },
+    "mislabelled_holiday": [
+      {
+        "date": "2026-09-02",
+        "logged_as": "3-shift"
+      }
+    ],
+    "temperature_excursion": {
+      "from": "2026-07-20",
+      "to": "2026-07-29",
+      "bump_c": 5.2
+    },
+    "mid_quarter_tariff_change": "2026-09-03",
+    "dropped_intervals": [
+      {
+        "meter_id": "furnace",
+        "from": "2026-05-03T18:00",
+        "to": "2026-05-04T06:00",
+        "rows": 48
+      },
+      {
+        "meter_id": "main",
+        "from": "2026-09-19T09:00",
+        "to": "2026-09-19T12:00",
+        "rows": 12
+      }
+    ],
+    "meter_reset": {
+      "meter_id": "lighting",
+      "ts": "2026-08-27T23:15:00Z",
+      "value": -4535.4649,
+      "rows": 1
+    }
+  },
+  "row_counts": {
+    "meter_15min": 158052,
+    "tariff": 6,
+    "production": 549,
+    "weather": 183
+  },
+  "known_limits": [
+    "Cooling response is piecewise in temperature; a linear beta_cdd * CDD baseline cannot represent the kink above 27.0 C, so some weather effect lands in the residual.",
+    "Sub-meters are measured independently of the main meter and will not reconcile exactly.",
+    "Single site, two quarters, three product families. No real company or personal data of any kind."
+  ],
+  "dataset_id": "holdout-s4201-r220",
+  "profile": "holdout",
+  "seed": 4201,
+  "target_rise_pct": 22.0,
+  "generated_at": "2026-10-11T08:07:52+00:00",
+  "generator": "rng/data/generator.py"
+}

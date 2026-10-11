@@ -1,0 +1,10 @@
+{
+  "dataset_id": "holdout-s4201-r220",
+  "emission_factor_kg_co2e_per_kwh": 0.71,
+  "currency": "INR",
+  "peak_start_hour": 9,
+  "peak_end_hour": 21,
+  "peak_applies_on_weekends": false,
+  "submeter_reconciliation_tolerance_pct": 6.0,
+  "note": "Values the analyser is allowed to read. ground_truth.json is not."
+}
