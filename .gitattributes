@@ -1,0 +1,18 @@
+# Normalise text files, but never touch binaries.
+* text=auto
+
+*.pdf     binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.xlsx    binary
+*.parquet binary
+*.duckdb  binary
+*.db      binary
+*.sqlite  binary
+*.sqlite3 binary
+
+# Keep shell scripts LF so they run inside the container.
+*.sh text eol=lf
