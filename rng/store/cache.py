@@ -8,6 +8,10 @@ a lookup. The keys differ by kind on purpose:
 
 One blob keyed by (period, compare_to) would break "which assets used the most
 in Q3?" by forcing a comparison period the question never asked for.
+
+A single-period result has no compare_to. Store it as '' (the column is part
+of the primary key and DuckDB keys reject NULL) and hand callers None.
+Write with INSERT OR REPLACE so a reload through /ingest overwrites cleanly.
 """
 
 from __future__ import annotations

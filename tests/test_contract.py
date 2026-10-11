@@ -170,6 +170,27 @@ def test_timestamps_come_back_in_utc_whatever_the_machine_time_zone():
     assert con.execute("SELECT hour(ts) FROM meter_15min").fetchone()[0] == 0
 
 
+def test_cache_holds_single_period_and_paired_results_side_by_side():
+    """Top-users needs one period; the bridge needs a pair. Both must fit,
+    two single-period kinds must not collide, and a rewrite must replace."""
+    pytest.importorskip("duckdb")
+    from rng.store.db import connect, init_schema
+
+    con = connect(":memory:")
+    init_schema(con)
+    insert = ("INSERT OR REPLACE INTO analysis_cache "
+              "(dataset_id, kind, period, compare_to, payload, computed_at) "
+              "VALUES (?, ?, ?, ?, ?, now())")
+    con.execute(insert, ["d", "asset_totals", "2026-Q3", "", "{}"])
+    con.execute(insert, ["d", "idle_load", "2026-Q3", "", "{}"])
+    con.execute(insert, ["d", "bridge", "2026-Q3", "2026-Q2", "{}"])
+    con.execute(insert, ["d", "bridge", "2026-Q3", "2026-Q2", '{"v": 2}'])
+    rows = con.execute("SELECT kind, payload FROM analysis_cache "
+                       "ORDER BY kind").fetchall()
+    assert [r[0] for r in rows] == ["asset_totals", "bridge", "idle_load"]
+    assert rows[1][1] == '{"v": 2}'
+
+
 def test_raw_tables_match_annex_b():
     duckdb = pytest.importorskip("duckdb")
     con = duckdb.connect(":memory:")

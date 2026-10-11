@@ -74,14 +74,16 @@ CREATE TABLE IF NOT EXISTS meter_clean (
 );
 
 -- Precomputed analysis, written once at startup and read on every request.
--- compare_to is NULLABLE on purpose: top-users and idle-load are keyed by a
--- single period, and forcing them to carry an arbitrary comparison period
--- would break questions that never asked for one.
+-- Top-users and idle-load are keyed by a single period; forcing them to carry
+-- an arbitrary comparison period would break questions that never asked for
+-- one. Their compare_to is the EMPTY STRING, not NULL: DuckDB primary-key
+-- columns reject NULL, and without a real key INSERT OR REPLACE cannot work.
+-- rng/store/cache.py maps None <-> '' so callers never see the difference.
 CREATE TABLE IF NOT EXISTS analysis_cache (
     dataset_id   VARCHAR     NOT NULL,
     kind         VARCHAR     NOT NULL,   -- asset_totals | idle_load | bridge | ...
     period       VARCHAR     NOT NULL,
-    compare_to   VARCHAR,
+    compare_to   VARCHAR     NOT NULL DEFAULT '',
     payload      VARCHAR     NOT NULL,   -- json
     computed_at  TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (dataset_id, kind, period, compare_to)
