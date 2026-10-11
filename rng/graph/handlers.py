@@ -178,7 +178,9 @@ def top_users(store: Store, state: dict) -> dict[str, Any]:
         return {"missing": f"no asset totals have been computed for {period}"}
     rows = sorted(rows, key=lambda r: r.get("rank", 0) or 0)
     asked = (state.get("intent") or {}).get("asset")
-    shown = rows[:TOP_N]
+    # "Which use the least?" is the same lookup read from the other end.
+    least = (state.get("intent") or {}).get("order") == "asc"
+    shown = rows[::-1][:TOP_N] if least else rows[:TOP_N]
     if asked and asked not in [r["asset"] for r in shown]:
         shown += [r for r in rows if r["asset"] == asked]
     reg = Registry()
@@ -194,8 +196,12 @@ def top_users(store: Store, state: dict) -> dict[str, Any]:
         if r.get("cost") is not None:
             reg.put(f"asset.{r['asset']}.cost", r["cost"], ccy, src="rank_assets",
                     ev=ev, label=f"Cost of {r['asset']} in {period} ({ccy})")
-    return {"registry": reg, "notes": ["Measured sub-meter data, not a model."],
+    return {"registry": reg, "notes": ["Measured sub-meter data, not a model.",
+                      "The assets are listed "
+                      + ("smallest first: the question asks for the LEAST."
+                         if least else "largest first.")],
             "facts": {"order": [r["asset"] for r in shown[:3]], "asked": asked,
+                      "direction": "smallest" if least else "largest",
                       "ccy": ccy},
             "limitations": _limitations(store, period, [
                 "Sub-meters do not sum exactly to the main meter; shares are "
@@ -209,7 +215,8 @@ def idle_load(store: Store, state: dict) -> dict[str, Any]:
     stats = store.cached("idle_load", period)
     if not stats:
         return {"missing": f"no idle-load analysis has been computed for {period}"}
-    rows = sorted(stats.values(), key=lambda r: r["idle_kwh"], reverse=True)
+    least = (state.get("intent") or {}).get("order") == "asc"
+    rows = sorted(stats.values(), key=lambda r: r["idle_kwh"], reverse=not least)
     asked = (state.get("intent") or {}).get("asset")
     if asked:
         rows = [r for r in rows if r["asset"] == asked] or rows
@@ -238,7 +245,8 @@ def idle_load(store: Store, state: dict) -> dict[str, Any]:
                     label=f"Cost of idle energy of {a} ({ccy})")
     return {"registry": reg, "notes": [
                 "Idle means intervals with no production: nights, weekends and holidays."],
-            "facts": {"order": [r["asset"] for r in shown[:3]], "ccy": ccy},
+            "facts": {"order": [r["asset"] for r in shown[:3]], "ccy": ccy,
+                      "direction": "smallest" if least else "largest"},
             "limitations": _limitations(store, period, [
                 "Idle load is not all waste: some standby load is unavoidable."]),
             "trace": [("find_idle_load", {"period": period},

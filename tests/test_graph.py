@@ -234,3 +234,16 @@ def test_trace_has_the_annex_c_shape(engine):
 def test_offline_router_policy(question, expected):
     assets = ["main", "kiln", "press_7", "line_1"]
     assert route_keywords(question, assets).intent == expected
+
+
+def test_asking_for_the_least_is_not_answered_with_the_most(engine):
+    """Found by typing a new question into the page: 'least' came back as the
+    largest users. The direction of a ranking is part of the question."""
+    most = ask(engine, "Which assets use the most energy?")
+    least = ask(engine, "Which assets use the least energy?")
+    assert least.answer_type.value == "calculated"
+    assert "smallest" in least.summary and "largest" not in least.summary
+    assert least.summary.index("line_1") < least.summary.index("kiln")
+    assert most.summary.index("kiln") < most.summary.index("line_1")
+    lowest = ask(engine, "Which machine has the lowest consumption?")
+    assert "smallest" in lowest.summary

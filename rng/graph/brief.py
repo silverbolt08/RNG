@@ -71,7 +71,7 @@ def _asset_line(reg: Registry, asset: str) -> str:
 def _top_users(reg: Registry, st: dict) -> str:
     f = st["facts"]
     order = f["order"]
-    out = [f"In {st['period']} the largest energy user was "
+    out = [f"In {st['period']} the {f.get('direction', 'largest')} energy user was "
            f"{_asset_line(reg, order[0])}."]
     if len(order) > 1:
         out.append("It is followed by "
@@ -92,7 +92,7 @@ def _idle_line(reg: Registry, asset: str) -> str:
 def _idle_load(reg: Registry, st: dict) -> str:
     order = st["facts"]["order"]
     return (f"While nothing was being produced in {st['period']}, the sub-meters "
-            f"still used {reg.show('idle.total_kwh')} kWh. The largest idle loads "
+            f"still used {reg.show('idle.total_kwh')} kWh. The {st['facts'].get('direction', 'largest')} idle loads "
             f"are {_join([_idle_line(reg, a) for a in order])}. This is energy "
             "used at night, at weekends and on holidays; part of it is "
             "unavoidable standby.")

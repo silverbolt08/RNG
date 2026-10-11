@@ -62,6 +62,7 @@ class Intent:
     asset: str | None = None
     tariff_scale: float | None = None   # what-if: 0.9 means 10% lower
     scenario: str | None = None         # what-if: "tariff" | "fix_waste"
+    order: str | None = None            # ranking: "asc" = the least, not the most
     reason: str | None = None
     source: str = "keyword_router"
 
@@ -98,6 +99,8 @@ def route_keywords(question: str, assets: list[str]) -> Intent:
     q = question.lower().strip()
     periods = find_periods(question)
     out = Intent(asset=find_asset(question, assets))
+    if _has(q, "least", "lowest", "smallest", "fewest", "minimum", "bottom"):
+        out.order = "asc"
     if periods:
         out.period = periods[0]
     if len(periods) > 1:
@@ -138,7 +141,8 @@ def route_keywords(question: str, assets: list[str]) -> Intent:
     elif (_has(q, "most energy", "top user", "which asset", "which machine",
                "which meter", "by asset", "by meter", "breakdown by",
                "use the most", "uses the most", "consume", "share of")
-          or (_has(q, "biggest", "largest", "highest", "top ", "most")
+          or (_has(q, "biggest", "largest", "highest", "top ", "most", "least",
+                   "lowest", "smallest")
               and _has(q, "asset", "machine", "meter", "equipment", "user",
                        "consumer"))):
         out.intent = "top_users"
@@ -170,6 +174,7 @@ Return ONLY a JSON object with these keys:
   asset: one of the listed meters if the question names one, else null
   scenario: for what_if only, "tariff" or "fix_waste", else null
   tariff_change_pct: for a tariff what_if, the signed percentage change (-10 for 10% lower), else null
+  order: "asc" if the question asks for the least, lowest or smallest, else "desc"
 
 Intents:
   bridge        why the bill changed; split into tariff, volume, mix, weather, waste
@@ -278,6 +283,10 @@ class LLM:
                 pct = data.get("tariff_change_pct")
                 out.tariff_scale = (1.0 + float(pct) / 100.0 if pct is not None
                                     else fallback.tariff_scale)
+            # The direction of a ranking is too easy to drop: either source saying
+            # "least" is enough.
+            if "asc" in (fallback.order, data.get("order")):
+                out.order = "asc"
             out.reason = fallback.reason
             return out, {"calls": 1, "tokens": tokens}
         except Exception as exc:  # network, quota, bad JSON: route offline
